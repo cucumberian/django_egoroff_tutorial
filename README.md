@@ -490,35 +490,35 @@ render(request, template_name, context: dict, content_type, status, using)
 В шаблонах нельзя вызывать методы питона.
 https://docs.djangoproject.com/en/4.2/ref/templates/builtins/#built-in-filter-reference
 
-фильтр | вызов | описание
--- | -- | --
-`capfirst` | `{{ var|capfirst }}` | делает первую букву заглавной
-`upper` | `{{ var|upper }}` | в верхний регистр
-`title` | `{{ var|title }}` | каждая первая буква каждого слова становится заглавной
-`add` | `{{ value|add:"2" }}` `{{ var1|add:var2 }}` | прибавляет значение (2) к переменной. Работает для целых чисел, строк, массивов и т.п. Можно складывать две переменных шаблона.
-`center` | `{{ value|center:15 }}` | расширяет строку до n символов (15) и центрирует вывод значения
-`ljust` | `{{ value|ljust:"10" }}` | строка длиной 10 символов выравнивание слева
-`rjust` | `{{ value|rjust:"10" }}` | строка длиной 10 символов выравнивание к правому краю
-`cut` | `{{ string|cut:symbol }}` | удаляет все символы из строки
-`truncatewords` | `{{ contents|truncatewords:2 }}` | оставляет первые два слова и затем ставит многоточие
-`date` | `{{ value|date:"D d M Y"}}` | преобразование даты к определённому формату
-`default` | `{{ value|default:"nothing" }}` | заменяет ложные значения ("" пустую строку) на значения по-умолчанию
-`defailt_is_none` | `{{ value|default_is_none:default_value}}` | заменяет только в том случае, если значение None
-`dictsort` | `{{ books|dictsort:"author.age"}}` | возвращает отсортированный словарь
-`divisibleby` | `{{ value|divisibleby:3 }}` | проверяет делится ли число на 3. `True|False`
-`first` | `{{ value|first }}` | возвращает первый элемент последовательности
-| `{{ value.0 }}` | вывести первый элемент последовательности
-`last` | `{{ value|last }}` | последний элемент последовательности
-`length` | `{{ value|length }}` | вернёт длину последовательности
-`length_is` | `{{ value"length_is:"4" }}` | True|False Будет ли длина value == 4
-`get_digit` | `{{ value|get_digit }}` | позиция цифры с правой стороны
-`join` | `{{ value|join:" - "}}` | джоинит последовательности через разделитель
-`make_list` | `{{ value|make_list }}` | `"Joel"` -> `["J", "o", "e", "l"]`
-`random` | `{{ value|random }}` | Случайное значение из последовательности
-`safe` | `{{ value|safe }}` | Позволяет не игнорировать HTML символы в строке
-`safeseq` | `{{ value|safeseq }}` | применяет `safe` к каждому элементу последовательности
-`slice` | `{{ value|slice:"2" }}` | позволяет делать срезы
-`slugify` | `{{ value|slugify }}` | в нижний регистр и все пробелы заменяются на `-`
+
+
+- `capfirst` | `{{ var|capfirst }}` | делает первую букву заглавной
+- `upper` | `{{ var|upper }}` | в верхний регистр
+- `title` | `{{ var|title }}` | каждая первая буква каждого слова становится заглавной
+- `add` | `{{ value|add:"2" }}` `{{ var1|add:var2 }}` | прибавляет значение (2) к переменной. Работает для целых чисел, строк, массивов и т.п. Можно складывать две переменных шаблона.
+- `center` | `{{ value|center:15 }}` | расширяет строку до n символов (15) и центрирует вывод значения
+- `ljust` | `{{ value|ljust:"10" }}` | строка длиной 10 символов выравнивание слева
+- `rjust` | `{{ value|rjust:"10" }}` | строка длиной 10 символов выравнивание к правому краю
+- `cut` | `{{ string|cut:symbol }}` | удаляет все символы из строки
+- `truncatewords` | `{{ contents|truncatewords:2 }}` | оставляет первые два слова и затем ставит многоточие
+- `date` | `{{ value|date:"D d M Y"}}` | преобразование даты к определённому формату
+- `default` | `{{ value|default:"nothing" }}` | заменяет ложные значения ("" пустую строку) на значения по-умолчанию
+- `defailt_is_none` | `{{ value|default_is_none:default_value}}` | заменяет только в том случае, если значение None
+- `dictsort` | `{{ books|dictsort:"author.age"}}` | возвращает отсортированный словарь
+- `divisibleby` | `{{ value|divisibleby:3 }}` | проверяет делится ли число на 3. `True|False`
+- `first` | `{{ value|first }}` | возвращает первый элемент последовательности
+- | `{{ value.0 }}` | вывести первый элемент последовательности
+- `last` | `{{ value|last }}` | последний элемент последовательности
+- `length` | `{{ value|length }}` | вернёт длину последовательности
+- `length_is` | `{{ value"length_is:"4" }}` | True|False Будет ли длина value == 4
+- `get_digit` | `{{ value|get_digit }}` | позиция цифры с правой стороны
+- `join` | `{{ value|join:" - "}}` | джоинит последовательности через разделитель
+- `make_list` | `{{ value|make_list }}` | `"Joel"` -> `["J", "o", "e", "l"]`
+- `random` | `{{ value|random }}` | Случайное значение из последовательности
+- `safe` | `{{ value|safe }}` | Позволяет не игнорировать HTML символы в строке
+- `safeseq` | `{{ value|safeseq }}` | применяет `safe` к каждому элементу последовательности
+- `slice` | `{{ value|slice:"2" }}` | позволяет делать срезы
+- `slugify` | `{{ value|slugify }}` | в нижний регистр и все пробелы заменяются на `-`
 
 ### Использование фильтров вне шаблона
 Фильтры в Django можно использовать не только в шаблонах, но и в любом другом месте python-кода. Для этого нужно импортировать нужный фильтр из `django.template.defaultfilters` и вызвать его, передав нужные аргументы
@@ -968,7 +968,7 @@ Movie.objects.all()[4].delete()
 
 ## 4.8 Фильтрация и выборка данных. `get` `filter` `exclude`
 Для получения записей по фильтре у класса `Manager` (`objects`) есть метод `.get()`.
-Выбираем апись по её `id`.
+Выбираем запись по её `id`.
 ```python
 movie = Movie.objects.get(id=5)
 movie2 = Movie.objects.get(rating=2)
@@ -988,13 +988,13 @@ movies = Movie.object.filter(budget__gt=10)
 - `__lte` - `<=`
 - `__isnull` - is Null True|false
 - `__contains='abc'` - `abc in fieldname`
-- `__icontains='Abc'` - `abc in fieldname` - без чувсвительности к региструь
+- `__icontains='Abc'` - `abc in fieldname` - без чувствительности к регистру.
 - `__startswith='abc'` - начинается на `abc`
 - `__endswith='abc'` - заканчивается на `abc`
 - `__in=[1, 2, 3]` - проверка на вхождение во множество
 - `TableClass.objects.exclude(field=value)` - `!=`
 
-Метод `exclude` работает прямо противоположенно методу `filter` - отсеивает все значения, подходящие под фильтр.
+Метод `exclude` работает прямо противоположено методу `filter` - отсеивает все значения, подходящие под фильтр.
 В фильтре можно производить фильтрацию по нескольким полям:
 ```python
 movies = Movie.objects.filter(name__isnull=False, budget__gt=10000)
@@ -1003,7 +1003,7 @@ movies = Movie.objects.filter(name__isnull=False, budget__gt=10000)
 ```python
 movies = Movie.exclude(name=None).filter(budget__gt=10000)
 ```
-Для поиска строк содержащих часть другой строки cтоит использовать фальтр `__contains` или `__icontains`.
+Для поиска строк содержащих часть другой строки стоит использовать фильтр `__contains` или `__icontains`.
 
 Для поиска по вхождениям во множество:
 ```python
@@ -1011,7 +1011,7 @@ movies = Movie.object.filter(id__in=[1, 2, 3])
 ```
 
 ## 4.9 Объект `Q`. Более сложные условия `AND` и `OR`
-Для использовния более сложных условий понадобится класс Q:
+Для использования более сложных условий понадобится класс Q:
 ```python
 from django.db.models import Q
 ```
@@ -1818,4 +1818,150 @@ class MovieAdmin(admin.ModelAdmin):
 ```
 Нельзя размещать это поле в `list_display` в админке.
 
-## 6.5 Получение связанных записей
+## 6.5 Получение связанных объектов. Related objects.
+
+Находим режиссёра и актёров по фильму:
+```python
+movie = Movie.objects.filter(director__isnull=False)
+movie_director = movie.director # режиссёр фильма
+movie_actors = movie.actors.all() # QuerySet всех актёров
+```
+
+```html
+{% for actor in movie.actors.all %}
+    <li>
+        {{ actor }}
+    </li>
+{% endfor %}
+```
+
+
+Каждый раз, когда мы связываем таблицы при помощи внешнего ключа в отношении _многие-ко-многим_, джанго автоматически создаёт поле обратной связи.
+Название поля обратной связи выглядит как `названиеМодели_set`. Оно представляет собой объект обратной связи. У этого объекта есть метод `all()`, который позволяет получить все записи.
+Название поля обратной связи можно изменить.
+
+Находим список фильмов режиссера
+```python
+class Movie(models.Model):
+    ...
+    director = models.ForeignKey(to=Director)
+
+director = Director.objects.all[0]
+movies = director.movie_set.all()
+```
+Находим список фильмов по актёру через связь многие-ко-многим:
+```python
+class Movie(models.Model):
+    actors = models.ManyToManyField(to=Actor)
+    ...
+class Actor(models.Actor):
+    ...
+
+actor = Actor.objects.all()[0]
+movies = actor.movie_set.all()
+```
+
+Для изменения поля обратной связи в модели служит атрибут `related_name`
+```python
+class Movie(models.Model):
+    ...
+    actors = models.ManyToManyField(to-Actor, related_name="movies")
+
+actor = Actor.objects.all()[0]
+actor_movies = actor.movies.all()
+```
+
+## 6.6 Создание записей в коде с полями `ForeignKey` и `ManyToManyField`
+### ForeignKey
+```shell
+python manage.py shell_plus --print-sql
+```
+
+```python
+ts2 = Movie.objects.filter(name__icontains="Toy Story 2")
+ts2.director = None
+ts2.save()
+d = Director.objects.get(id=0)
+ts2.director = d
+ts2.save()
+```
+
+Если хотим создать нового режиссёра и добавить его к фильму, то после добавить можно уже существующий объект в базе данных. Т.е. его надо после создания сохранить
+```python
+d_voody = Director(
+    first_name="Вуди",
+    last_name="Ален",
+)
+voody.save()
+ts3 = Movie(
+    name="Toy story 3",
+    rating=65,
+    director=d_voody,
+)
+ts3.save()
+```
+
+При использовании метода `create` объект сразу сохраняется в бд, и нет необходимости вызывать метод `save`.
+```python
+d_voody = Director.objects.create(
+    first_name="Вуди",
+    last_name="Ален",
+)
+ts3 = Movie.objects.create(
+    name="Toy story 3",
+    rating=65,
+    director=d_voody,
+)
+```
+Т.е. связи можно образовывать между реально существующими объектами в базе данных.
+### ManyToManyField
+Связи также надо делать между существующими объектами в базе данных.
+Например нельзя добавлять актёров для фильма, который ещё не был сохранён в базе данных.
+```python
+actor1 = Actor.objects[1]
+actor2 = Actor.objects[2]
+ts3.actors.add(actor1)  # добавляем актёра1
+ts3.actors.add(actor2)  # добавляем актёра2
+
+ts3.actors.remove(actor1)   # удаляем акётра
+ts3.actors.remove(actor1)   # ещё раз удаляем - ошибкине будет
+```
+
+## 6.7 Связь один-к-одному
+```python
+class DressingRoom(models.Model):
+    floor = models.PositiveIntegerField()
+    number = models.PositiveIntegerField()
+
+
+    def __str__(self):
+        return f"Гримёрка #{self.number} на ${self.floor} этаже."
+
+
+class Actor(models.Model):
+    ...
+    dressing_room = models.OneToOneField(
+        to=DressingRoom,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+```
+Параметр `related_name` в атрибуте модели можно не менять, т.к. для записи один-к-одному django создаёт название поля, полностью совпадающее с названием модели.
+```python
+d = DressingRoom.objects.all()[0]
+
+dressing_room_actor = d.actor   # получаем объект актера по гримёрке
+
+a = Actor.objects.all()[0]
+a.dressing_room = d
+a.save()    # поулчим ошибку, т.к. это связь 1-к-1, а гримерка уже связана
+```
+
+```python
+# admin.py
+
+@admin.register(models.DressingRoom)
+class DressingRoomAdmin(admin.ModelAdmin):
+    list_display = ['floor', 'number', 'actor']
+```
