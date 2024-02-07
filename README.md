@@ -1965,3 +1965,517 @@ a.save()    # поулчим ошибку, т.к. это связь 1-к-1, а �
 class DressingRoomAdmin(admin.ModelAdmin):
     list_display = ['floor', 'number', 'actor']
 ```
+
+# 7. Формы и Class-Based Views
+## 7.2 Создание формы
+## 7.3  GET и POST запросы. CSRF
+
+Форма отправляет запросы двух видов: GET и POST.
+### GET
+По-умолчанию форма отправляет GET запрос с данными проименованных полей в виде query параметров.
+Для извлечения query параметров из запроса надо обратиться к полю `GET` объекта `request`:
+```python
+def index(request):
+    query_params = request.GET  # QuerySet - аналог словаря
+    pass
+    # извлечение определенного значения
+    name_param: str = request.GET.get('name')
+```
+
+- GET запросы могут кэшироваться
+- GET запросы остаются в истории браузера
+- GET запросы могут быть закладками
+- GET запросы никогда не должны использоваться при работе с конфиденциальными данными
+- GET запросы имеют ограничения по длине
+- GET запросы должны использоваться только для извлечения данных
+
+### POST
+- POST запросы никогда не кэшируются
+- Запросы POST не сохраняются в журнале обозревателя
+- Запросы POST не могут быть закладками
+- Запросы POST не имеют ограничений по длине данных
+
+Чтобы изменить тип запроса на POST в форме нужно прописать параметр `method`:
+```html
+<form method="post">
+    {% csrf_token %}
+    <input name="feedback">
+    <button type='submit'>
+</form>
+```
+```python
+def index(request):
+    post_paramaters_dict = request.POST
+    ...
+```
+При отправке методом `post` надо установить `csrf` токен чтобы защититься от межсайтовой подделки запросов.
+Поэтому надо вставить этот токен в форму, чтобы он отправлялся вместе с данными формы.
+Для извлечения пост параметров из запроса используется конструкция `data: QueryDict = request.POST`.
+
+### адрес отправки данных
+по умолчанию форма отправляет данные на тот адрес, с которого она открыта. Чтобы изменить его
+### CSRF 
+#### Что такое CSRF
+CSRF (англ. cross-site request forgery перевод межсайтовая подделка запроса) —  вид атак на посетителей веб-сайтов, использующий недостатки протокола HTTP. Это атака, которой может подвергаться любой веб-ресурс или веб-приложение. В первую очередь это касается сайтов, которые используют cookies, сертификаты авторизации и браузерную аутентификацию. В результате атаки страдают клиенты и репутация ресурса.
+
+Причина CSRF кроется в том, что браузеры не понимают, как различить, было ли действие явно совершено пользователем (как, скажем, нажатие кнопки на форме или переход по ссылке) или пользователь неумышленно выполнил это действие (например, при посещении _bad.com_, ресурсом был отправлен запрос на _good.com/some_action_, в то время как пользователь уже был залогинен на _good.com_).
+
+#### Пример атаки
+Атака осуществляется путём размещения на веб-странице ссылки или скрипта, пытающегося получить доступ к сайту, на котором атакуемый пользователь заведомо (или предположительно) уже аутентифицирован. Например, пользователь Алиса может просматривать форум, где другой пользователь, Боб, разместил сообщение. Пусть Боб создал тег <img>, в котором в качестве источника картинки указал URL, при переходе по которому выполняется действие на сайте банка Алисы, например:
+
+>   Боб: Привет, Алиса! Посмотри, какой милый котик:     
+```html
+​​​​​​​<img src="http://bank.example.com/?account=Alice&amount=1000000&for=Bob">
+```
+Если банк Алисы хранит информацию об аутентификации Алисы в куки, и если куки ещё не истекли, при попытке загрузить картинку браузер Алисы отправит куки в запросе на перевод денег на счёт Боба, чем подтвердит аутентификацию Алисы. Таким образом, транзакция будет успешно завершена, хотя её подтверждение произойдет без ведома Алисы.
+
+#### Как от нее защититься?
+Эффективным и общепринятым на сегодня способом защиты от CSRF-Атаки является токен. Под токеном имеется в виду случайный набор байт, который сервер передает клиенту, а клиент возвращает серверу.
+
+Защита сводится к проверке токена, который сгенерировал сервер, и токена, который прислал пользователь.
+
+#### Что такое CSRF-token и как он работает
+В общем понимании __токен__ — это механизм, который позволяет идентифицировать пользователя или конкретную сессию для безопасного обмена информацией и доступа к информационным ресурсам. Токены помогают проверить личность пользователя (например, клиента, который онлайн получает доступ к банковскому счёту). Их используют как вместо пароля, так и вместе с ним. Токен — это в каком-то смысле электронный ключ.
+
+__CSRF-token__ — это максимально простой и результативный способ защиты сайта от CSRF-мошенников. Он работает так: сервер создаёт случайный ключ (он же токен) и отправляет его браузеру клиента. Когда браузер запрашивает у сервера информацию, сервер, прежде чем дать ответ, требует показать ключ и проверяет его достоверность. Если токен совпадает, сессия продолжается, а если нет — прерывается. Токен действителен только одну сессию — с новой сессией он обновляется.
+
+Чтобы получить ответ от сервера, используются разные методы запроса. Условно они делятся на две категории: те, которые не изменяют состояние сервера (GET, TRACE, HEAD), и те, которые изменяют (PUT, PATCH, POST и DELETE). Последние имеют большую CSRF-уязвимость и поэтому должны быть защищены в первую очередь.
+
+При создании и использовании токена должны соблюдаться следующие условия:
+
+нахождение в скрытом параметре;
+
+генерация с помощью генератора псевдослучайных чисел;
+
+ограниченное время жизни (одна сессия);
+
+уникальность для каждой транзакции;
+
+устойчивый к подбору размер (в битах);
+
+невозможно переиспользовать.
+
+##### Источники
+- [Хабр](https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2%D0%B0%D1%8F_%D0%BF%D0%BE%D0%B4%D0%B4%D0%B5%D0%BB%D0%BA%D0%B0_%D0%B7%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D0%B0)
+- [Что означает ошибка «CSRF токен истек»](https://help.reg.ru/hc/ru/articles/4417799125777-%D0%A7%D1%82%D0%BE-%D0%BE%D0%B7%D0%BD%D0%B0%D1%87%D0%B0%D0%B5%D1%82-%D0%BE%D1%88%D0%B8%D0%B1%D0%BA%D0%B0-CSRF-%D1%82%D0%BE%D0%BA%D0%B5%D0%BD-%D0%B8%D1%81%D1%82%D0%B5%D0%BA-)
+
+- [Вика](https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2%D0%B0%D1%8F_%D0%BF%D0%BE%D0%B4%D0%B4%D0%B5%D0%BB%D0%BA%D0%B0_%D0%B7%D0%B0%D0%BF%D1%80%D0%BE%D1%81%D0%B0)
+
+__Сессия__ - это установленное tcp connection (status "CONNECTED"). Текущие можно посмотреть так:
+```shell
+netstat -na | grep "CONNECTED"
+```
+
+## 7.4 Ручная валидация формы
+```python
+def index(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if not name:
+            return render(
+                request,
+                'feedback/feedback.html',
+                {'error-name': True}
+            )
+        return HttpResponseRedirect(
+            reverse=(viewname='feedback:done')
+        )
+    return render(..., {'error-name': False})
+
+def done(request):
+    return render(request, '/templates/feedback/done/html')
+```
+Не очень удобно выполнять проверку на все поля формы вручную.
+
+## 7.5 Класс Django-Form
+Формы для джанго пишутся в отдельном файле `app_name/forms.py`
+```python
+# forms.py
+from django import forms
+
+class FeedbackForm(forms.Form):
+    name = forms.CharField(
+        max_length=100,
+        label="имя",
+    )
+    surname = forms.CharField(
+        max_length=100,
+        min_length=2,
+        required=False,
+        label="фамилия",
+    )
+    feedback = forms.CharField(
+        label="отзыв",
+        widget=forms.Textarea(attrs={"rows": "3", "cols": "40"}),
+    )
+```
+
+Затем в шаблон вставляется отдельный объект формы через контекст:
+
+```python
+# views.py
+from .forms import FeedbackForm
+
+def index(request):
+    if request.method == "POST"
+        form = FeedbackForm(request.POST)
+        if form.is_valid:
+            print(form.cleaned_data)    # словарь со значениями формы
+            return HttpResponseRedirect(reverse("feedback:done"))
+    form = FeedbackForm()
+    return render_template(
+        request,
+        'feedback/feedback.html',
+        {'forms': form},
+    )
+```
+
+```html
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit">
+</form>>
+```
+
+## 7.2 Валидация формы
+```python
+# forms.py
+class FeedbackForm(forms.Form):
+    name = forms.CharField(
+        min_length=2,
+        max_length=10,
+        label="Имя",
+        error_messages = {
+            "min_length": "Мало символов",
+            "max_length": "Много символов",
+            "required": "Должно что-то быть",
+        },
+    )
+    rating = forms.IntegerField(
+        min_value=1,
+        max_value=5,
+        initial=1,
+    )
+
+```
+В данном примере, мы отправляем невалидную форму обратно клиенту с уже заполненными полями, а не пустую форму.
+```python
+# views.py
+def index(request):
+    if request.method == 'POST':
+        form = FeedbackForm(data=request.POST)
+        if form.is_valid:
+            pass
+            # ...
+        else:
+            # ...
+            pass
+    else:
+        form = FeedbackForm()
+
+    return render(
+        request,
+        'feedback.html',
+        {'form': form},
+    )
+```
+Таким образом сначала у клиента форма будет валидироваться через html атрибуты тегов, затем в джанго через параметры поля формы.
+
+## 7.7 Ручная настройка полей и стилей
+Можно выводить не все поля формы целиком, а вручную поэлементно
+```html
+<form>
+    {% csrf_token %}
+
+    {{ form.name.label_tag }}
+    {{ form.name.errors }}
+    {{ form.name }}
+
+    {{ form.surname.label_tag }}
+    {{ form.surname.errors }}
+    {{ form.surname }}
+</form>
+```
+Чтобы вручную не писать каждое поле, то структуру всех полей записывают в цикле:
+```html
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'feedback/css/form.css' %}">
+</head>
+
+<body>
+
+<form>
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="form-style {%if field.errors %}error-class{% endif %}">
+            {{ field.label_tag }}
+            {{ field.errors }}
+            {{ field }}
+        </div>
+    {% endfor %}
+</form>
+</body>
+```
+Можно динамически добавлять класс тем полям, которые с ошибками написав условие прямо в коде.
+
+
+## 7.8 Сохранение данных с помощью БД
+Создадим модель данных для формы
+```python
+# models.py
+
+class Feedback(models.Model):
+    name = models.CharField(max_length=100)
+    surname = models.CharField(max_length=100)
+    feedback = models.TextField()
+    rating = models.PositiveIntegerField()
+
+```
+ВО вьюшке сохраним объект модели из формы после валидации и сохраним его в базу данных.
+```python
+# views.py
+from .forms import FeedbackForm
+from .models import Feedback
+
+...
+if form.is_valid:
+    feed = Feedback(
+        name=form.cleaned_data.get('name'),
+        surname=form.cleaned_data.get('surname'),
+        feedback=form.cleaned_data.get('feedback'),
+        rating=form.cleaned_data.get('rating'),
+    )
+    feed.save()
+
+```
+или более короче, если поля формы соответствуют модели
+```python
+...
+if form.is_valid:
+    Feedback.objects.create(**form.cleaned_data)
+...
+```
+
+## 7.9 ModelForm
+Описание модели для формы очень похоже на форму.
+Чтобы не повторять все записи, в джанге можно создать форму из модели. 
+```python
+# forms.py
+from django import forms
+from .models import Feedback
+
+class FeedbackForm(ModelForm):
+    class Meta:
+        model = Feedback
+        # fields = ['name', 'surname', 'feedback', 'rating']
+        exclude = []
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'surname': forms.TextInput(attrs={'class': 'form-control'}),
+            'feedback': forms.Textarea(attrs={'class': 'form-control'}),
+            'rating': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+```
+Т.к. есть прямая связь между формой и моделью, уже не надо в объект модели передавать все поля формы, мы сразу получаем объект модели из формы.
+```python
+# views.py
+
+def index(request) -> HttpResponse:
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse("feedback:done"))
+    else:
+        form = FeedbackForm()
+
+    return render(
+        request,
+        "feedback/feedback.html",
+        {"form": form, "feedback_id": 3},
+    )
+```
+
+### Пример как создать кастомное поле с html ограничениями на макс значение
+```python
+class IntegerRangeField(models.IntegerField):
+    def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
+        self.min_value, self.max_value = min_value, max_value
+        models.IntegerField.__init__(self, verbose_name, name, **kwargs)
+
+    def formfield(self, **kwargs):
+        defaults = {'min_value': self.min_value, 'max_value': self.max_value}
+        defaults.update(kwargs)
+        return super(IntegerRangeField, self).formfield(**defaults)
+```
+
+## 7.10 Изменение данных через форму
+```python
+
+def update_feedback(request, feedback_id: int) -> HttpResponse:
+    feed = get_object_or_404(klass=Feedback, id=feedback_id)
+    if request.method == "POST":
+        form = FeedbackForm(data=request.POST, instance=feed)
+        if form.is_valid():
+            feed.save()
+            return HttpResponseRedirect(
+                reverse(
+                    viewname="feedback:update_feedback", args=(feedback_id,)
+                )
+            )
+    else:
+        form = FeedbackForm(instance=feed)
+    return render(request, "feedback/feedback.html", {"form": form})
+```
+При создании формы из класса ModelForm можно её сразу привязывать к существующему объекту из базы данных.
+```python
+feed = get_object_or_404(klass=Feedback, id=feedback_id)
+form = FeedbackForm(data=request.POST, instance=feed)
+```
+
+## 7.11 Class Based Views
+Это представление на классах. Можно реализовывать логику внутри `views.py` при помощи классов а не функций.
+Существует несколько вариантов. Будет рассмотрен только один - самый простой.
+При использовании CBV название методов должны совпадать с именем http методов
+```python
+# views.py
+from django.views import View
+
+class FeedbackView(View):
+    def get(self, request):
+        form = FeedbackForm()
+        return render(
+            request, 'feedback/feedback.html', {'form': form},
+        )
+
+    def post(self, request):
+        form = FeedbackForm(**request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse("feedback:done"))
+        return render(
+            request, 'feedback/feedback.html', {'form': form},
+        )
+
+```
+Для привязки роутов к CBV используется метод класса `.as_view()`
+```python
+from . import views
+
+urlpatterns = [
+    path('', views.FeedbackView.as_view(), name="feedback_index")
+]
+```
+
+## Итоги
+```python
+# views.py
+class FeedbackView(View):
+    def get(self, request):
+        form = FeedbackForm()
+        return render(
+            request,
+            "feedback/feedback.html",
+            {"form": form},
+        )
+
+    def post(self, request):
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse(viewname="feedback:done"))
+        return render(
+            request,
+            "feedback/feedback.html",
+            {"form": form},
+        )
+
+
+class DoneView(View):
+    def get(self, request) -> HttpResponse:
+        return HttpResponse("Спасибо, ваш отзыв получен")
+
+
+class FeedbackUpdateView(View):
+    def get(self, request, feedback_id: int) -> HttpResponse:
+        feed = get_object_or_404(klass=Feedback, id=feedback_id)
+        form = FeedbackForm(instance=feed)
+        return render(
+            request,
+            "feedback/feedback.html",
+            {"form": form},
+        )
+
+    def post(self, request, feedback_id: int) -> HttpResponse:
+        feed = get_object_or_404(klass=Feedback, id=feedback_id)
+        form = FeedbackForm(data=request.POST, instance=feed)
+        if form.is_valid():
+            form.save()
+        return render(
+            request,
+            "feedback/feedback.html",
+            {"form": form},
+        )
+
+
+def update_feedback(request, feedback_id: int) -> HttpResponse:
+    feed = get_object_or_404(klass=Feedback, id=feedback_id)
+    if request.method == "POST":
+        form = FeedbackForm(data=request.POST, instance=feed)
+        if form.is_valid():
+            print(f"{form = }", request.POST)
+            feed.save()
+            return HttpResponseRedirect(
+                reverse(
+                    viewname="feedback:update_feedback", args=(feedback_id,)
+                )
+            )
+    else:
+        form = FeedbackForm(instance=feed)
+    return render(request, "feedback/feedback.html", {"form": form})
+```
+```python
+# urls.py
+urlpatterns = [
+    path(
+        "feedback/<int:feedback_id>/",
+        views.FeedbackUpdateView.as_view(),
+        name="update_feedback",
+    ),
+    path("feedback/", views.FeedbackView.as_view(), name="index"),
+    path("done/", views.DoneView.as_view(), name="done"),
+]
+```
+
+```python
+# models.py
+from django.db import models
+
+
+class Feedback(models.Model):
+    name = models.CharField(max_length=100, verbose_name="имя")
+    surname = models.CharField(max_length=100, verbose_name="фамилия")
+    feedback = models.TextField(verbose_name="отзыв")
+    rating = models.PositiveIntegerField(verbose_name="рейтинг")
+```
+
+```python
+# forms.py
+from django import forms
+from django.forms import ModelForm
+from .models import Feedback
+
+
+class FeedbackForm(ModelForm):
+    class Meta:
+        model = Feedback
+        exclude = []
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'surname': forms.TextInput(attrs={'class': 'form-control'}),
+            'feedback': forms.Textarea(attrs={'class': 'form-control'}),
+            'rating': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+```
