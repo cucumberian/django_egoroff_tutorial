@@ -662,7 +662,7 @@ print(slug)
 ```
 {% block content %}
     {% block nav %}
-        {% include 'app_name/includes/navbar.html'%}
+        {% include 'app_name/includes/navbar.html' %}
     {% endblock %}
 {% endblock %}
 
@@ -2479,3 +2479,497 @@ class FeedbackForm(ModelForm):
             'rating': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 ```
+
+# 8 Class Based Views. Представления, основанные на классах.
+## 8.1 Введение в CBV
+## 8.2 TemplateView
+Специальный класс, чтобы сразу отдавать шаблон а не наследоваться от метода View и писать метод get с выдачей шаблона через render.
+```python
+# views.py
+from django.views.generic.base import TemplateView
+
+# class DoneView(View):
+#     def get(self, request) -> HttpResponse:
+#         return render(
+#             request,
+#             "feedback/done.html",
+#         )
+
+class DoneView(TemplateView):
+    template_name = 'feedback/done.html'
+```
+
+
+Т.к. этот класс наследуется от View, то у него также есть метод `.as_view()` для создания представления.
+```python
+# urls.py
+
+urlpatterns = [
+    path('done/', views.DoneView.as_view(), name='done')
+]
+```
+### Передача параметров в шаблон
+Чтобы передать параметры в шаблон, нужно у класса переопределить родительский метод `get_context_data`
+```python
+class DoneView(TemplateView):
+    template_name = 'feedback/done.html'
+
+    def get_context_data(self, **kwargs):
+        context: dict = super().get_context_data(**kwargs)
+        context['name'] = 'ivanov'
+        context['data'] = '23.03.23'
+        return context
+```
+Таким образом эти переменные будут доступны внутри шаблона.
+Вот пример как можно получать динамический параметр в таком классе:
+```python
+# views.py
+# class FeedbackInfoView(View):
+#     def get(self, request, feedback_id: int) -> HttpResponse:
+#         feedback = get_object_or_404(klass=Feedback, id=feedback_id)
+#         return render(
+#             request,
+#             "feedback/feedback_info.html",
+#             {"feedback": feedback},
+#         )
+
+
+class FeedbackInfoView(TemplateView):
+    template_name = "feedback/feedback_info.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        feedback_id: int = kwargs.get("feedback_id")
+        feedback = get_object_or_404(klass=Feedback, id=feedback_id)
+        context["feedback"] = feedback
+        return context
+```
+
+## 8.3 ListView
+Задача этого шаблона - отображать данные из бд, т.е. несколько объектов модели данных.
+По-умолчанию данный шаблон список объектов помещает в `context['object_list']`.
+Чтобы переопределить имя этого атрибута надо переопределить `context_object_name`
+```python
+from django.views.generic import ListView
+
+# class FeedbackListView(TemplateView):
+#     template_name = "feedback/list_feedback.html"
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context["feedbacks"] = Feedback.objects.all()
+#         return context
+class FeedbackListView(ListView):
+    template_name = 'feedback/list_feedback.html'
+    model = Feedback
+    context_object_name = 'feedbacks'
+```
+Также доступен полный перечень стандартных методов, например `get_context_data`.
+С помощью переопределения родительского метода `get_queryset` (возвращает множество объектов модели тип `QuerySet`) можно фильтровать значения.
+```python
+from django.views.generic import ListView
+
+class FeedbackList(ListView):
+    template_name = 'feedback/list_feedback.html'
+    model = Feedback
+    context_object_name = 'feedbacks'
+    
+    def get_queryset(self):
+        # получаем от родительского метода список всех объектов
+        queryset = super().get_queryset()
+        # возвращает записи с рейтингом >= 4
+        qs = queryset.filter(rating__gte=4)
+        return qs
+```
+Если хотите дополнительно передать другие аргументы из views в шаблон, то можете использовать переменную extra_context, где передать словарь. Например, 
+```python
+extra_context = {'agg': Actor.objects.aggregate(Count('id'))}
+```
+## 8.4 DetailView
+Для отображения одной записи из базы данных.
+Для того, чтобы класс `DetailView` понял как ему получать элемент из базы данных, надо определённым образом задавать имя аргумента во вьюхе:
+- `pk` - поиск по первичному ключу
+- `slug` - поиск по слагу
+```python
+# urls.py
+urlpatterns = [
+    path('feedback/<int:pk>', views.FeedbackInfoView.as_view()),
+    path('movies/<slug:slug>', views.MovieInfoView.as_view()),
+]
+```
+
+```python
+# views.py
+from django.views.generic import DetailView
+
+class FeedbackInfoView(DetailView):
+    template_name = 'feedback/'
+    model = Feedback
+    # context_object_name = 'feedback' # по умолчанию и так будет таким же
+```
+Имя переменной в контексте, в которой данный класс сохраняет значение объекта - это имя класса в нижнем регистре. Например для класса `Feedback` будет существовать соответствующий ключ в `context['feedback']`.
+Через `context_object_name` можно изменить это поведение.
+
+### От базового класса
+Можно сразу реализовать это действие через потомков базового класса, просто создав инстанс от `DetailView` и передав в него необходимые параметры:
+```python
+# urls.py
+
+urlpatterns = [
+    path(
+        'feedbacks/<int:pk>',
+        DetailView(
+            template_name='feedback/feedback_info.html',
+            model=Feedback,
+            context_object_name='feedback',
+        ),
+    )
+]
+```
+## 8.5 FormView
+```python
+# views.py
+
+from django.views.generic import FormView
+
+# class FeedbackView(View):
+#     def get(self, request):
+#         form = FeedbackForm()
+#         return render(
+#             request,
+#             "feedback/feedback.html",
+#             {"form": form},
+#         )
+
+#     def post(self, request):
+#         form = FeedbackForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return HttpResponseRedirect(reverse(viewname="feedback:done"))
+#         return render(
+#             request,
+#             "feedback/feedback.html",
+#             {"form": form},
+#         )
+
+class FeedbackView(FormView):
+    # для метода get достаточно определить модель и шаблон
+    model = FeedbackForm
+    template_name = 'feedback/feedback.html'
+    # post
+    success_url = '/done'
+```
+Для определения метода `get` достаточно в наследуемом классе определить `template_name` и модель формы `model`.
+Для отработки отправки формы в классе формы надо определить `success_url` - путь по которому будет отправляться форма при сабмите.
+И указать классу что далеть с данными формы.
+Для этого надо переопределить метод `FormView.form_valid`.
+```python
+class FeedbackView(FormView):
+    template_name = ...
+    model = FeedbackForm
+    success_url = '/done'
+    def form_valid(self, form):
+        form.save()
+        return super(FeedbackView, self).form_valid(form)
+```
+
+## 8.6 `CreateView` `UpdateView`
+Предназначены для создания и изменения элементов
+### `CreateView`
+```python
+from django.views.generic import CreateView
+
+class FeedbackView(CreateView):
+    template_name = 'feedback/feedback.html'
+    # класс модели
+    model = Feedback
+    # класс формы для модели
+    from_class = FeedbackForm
+    # урл успешного перехода
+    success_url = '/done/'
+```
+Если не указать класс с формой, то джанго может сформировать форму на основе модели, если указать атрибут fields:
+```python
+class FeedbackView(CreateView):
+    model = Feedback
+    fields = ['name', 'surname', ] # отобразить не все поля
+    fields = '__all__'  # отобразить все поля
+
+    success_url = '/done/'
+    template_name = 'feedback/feedback.html'
+```
+При этом может столкнуться с ограничениями модели при отправки не всех полей в форме.
+### `UpdateView`
+Цель - изменение данных в бд
+```python
+# views.py
+from django.views.generic import UpdateView
+
+# class FeedbackUpdateView(View):
+#     def get(self, request, feedback_id: int) -> HttpResponse:
+#         feed = get_object_or_404(klass=Feedback, id=pk)
+#         form = FeedbackForm(instance=feed)
+#         return render(
+#             request,
+#             "feedback/feedback.html",
+#             {"form": form},
+#         )
+
+#     def post(self, request, feedback_id: int) -> HttpResponse:
+#         feed = get_object_or_404(klass=Feedback, id=pk)
+#         form = FeedbackForm(data=request.POST, instance=feed)
+#         if form.is_valid():
+#             form.save()
+#         return render(
+#             request,
+#             "feedback/feedback.html",
+#             {"form": form},
+#         )
+
+class FeedbackUpdateView(UpdateView):
+    model = Feedback
+    form_class = FeedbackForm
+    success_utl = '/done/'
+    template_name = 'feedback/feedback.html'
+```
+Ну забыть поменять ключ в urls.py на `pk` или `slug`.
+Также, как и с `CreateView` можно не указывать класс формы, а указать список полей, например `fields = '__all__'`.
+### `DeleteView`
+```python
+# views.py
+from django.views.generic import DeleteView
+
+class FeedbackDeleteView(DeleteView):
+    model = Feedback
+    # куда будет выполнен переход после удаления
+    # если ошиюка, писать строку
+    success_url = reverse('feedback:all_feedbacks')
+    template_name = 'feedback/feedback_delete.html'
+```
+Добавим путь, по которому будет работать этот класс.
+```python
+# urls.py
+
+urlpatterns = [
+    ...,
+    path(
+        'feedback/delete/<int:pk>/',
+        FeedbackDeleteView.as_view(),
+        name='delete_feedback'
+    )
+]
+```
+Далее можно создать форму, которая отправляет `POST` запрос на url, к которому привязан этот класс. Сработает метод пост, который удалит ассоциированную запись по `pk` или по `slug`.
+
+Форму можно создать на любой странице, т.о. переход на форму удаления производиться не будет. Если ну указать имя шаблона, то метод `GET` не будет реализован для этого url.
+
+# 9. Работа с файлами
+## 9.1 Загрузка файла с формы
+Создадим форму дял добавления изображения
+```html
+{% extends 'feedback/base.html' %}
+
+{% block title %} Добавление файла в галерею {% endblock %}
+
+{% block content %}
+    <h2>Загрузите файл</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="image">
+        <button type="submit">Загрузить</button>
+    </form>
+{% endblock %}
+```
+
+
+## 9.2
+https://docs.djangoproject.com/en/5.0/ref/files/uploads/#django.core.files.uploadedfile.UploadedFile
+
+При отправке форме файлы появляются в `request.FILES`. Главное не забыть прописать параметр у формы `enctype="multipart/form-data"`, чтобы файлы перевелись в двоичный вид и были отправлены.
+```python
+request.FILES.get('image'): InMemoryUploadFile # специальный тип данных
+
+```
+Напишем функцию, которая будет принимать данный объект и записывать его в файловую систему:
+```python
+from werkzeug.utils import secure filename
+from uuid import uuid4
+
+class UploadView(View):
+    @staticmethod
+    def save_file(file):
+        filename = str(uuid4()) + "-" + secure_filename(file.name)
+        with open(file=f"gallery_tmp/{filename}", mode="wb+") as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+
+    def get(self, request):
+        form = ImageUploadForm()
+        return render(request, "gallery/upload.html", {"form": form})
+
+    def post(self, request):
+        file = request.FILES.get("file")
+        if not file:
+            return HttpResponseRedirect(reverse("gallery:upload"))
+        self.__class__.save_file(file)
+        return HttpResponseRedirect(reverse("gallery:index"))
+```
+Записываем не весь файл целиком, а кусками (чанками), чтобы можно было работать с большими файлами.
+
+### Directory Traversal Attack
+https://stepik.org/lesson/730393/step/2?discussion=6567371&unit=731895
+Довольно важно тут сказать про directory traversal attack и защититься от неё ([пример](https://stackoverflow.com/questions/45188708/how-to-prevent-directory-traversal-attack-from-python-code)), чтобы те кто следуют курсу потом не выкатили приложение с допущенной этой ошибкой и не перезаписали себе системные файлы :)
+- https://ru.stackoverflow.com/questions/587855/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-werkzeug-secure-filename-%D1%81-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%BC%D0%B8-%D1%81%D0%B8%D0%BC%D0%B2%D0%BE%D0%BB%D0%B0%D0%BC%D0%B8
+- https://stackoverflow.com/questions/45188708/how-to-prevent-directory-traversal-attack-from-python-code
+
+## forms FileField
+```python
+# forms.py
+
+from django import forms
+
+class ImageUploadForm(forms.Form):
+    file = formsFileField(
+        required=True,
+    )
+```
+```python
+# views.py
+from .forms import ImageUploadForm
+
+class UploadView(View):
+    @staticmethod
+    def save_file(file):
+        filename = str(uuid4()) + "-" + secure_filename(file.name)
+        with open(file=f"gallery_tmp/{filename}", mode="wb+") as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+
+    def get(self, request):
+        form = ImageUploadForm()
+        return render(request, 'gallery/upload.html', {'form': form})
+
+    def post(self, request):
+        form = ImageUploadForm(
+            data = request.POST,
+            files = request.FILES,
+        )
+        if nor form.is_valid():
+            return render(request, 'gallery/upload.html', {'form': form})
+        self.__class__.save_file(form.cleaned_data['file'])
+```
+
+## 9.3 model FileField
+В модели FileField хранятся только ссылки на файлы, а не сами файлы.
+
+```python
+# settings.py
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
+```
+
+```python
+# models.py
+from form_project import settings
+
+class ImageModel = (models.Model):
+    image = models.FileField(
+        upload_to=settings.MEDIA_ROOT
+    )
+```
+Путь указанный в `upload_to` строится от каталога проекта. Если такого пути нет, то он создастся. По этому пути будут сохраняться файлы, которые были переданы в модель, а в базе сохраняться пути на файлы.
+Чтобы файлы хранились не в каталоге, а в указанной папке, в `settings.py` создается переменная `MEDIA_ROOT` и тогда уже в ней будет создаваться каталог, а не в корне проекта.
+
+Если джанго встретятся повторяющиеся имена файлов, то будут добавлены случайные символы к имен файла, чтобы избежать дубликатов. также все пробелы в названии будут заменены на _.
+
+
+```python
+# views.py
+
+class UploadView(View):
+    def get(self, request):
+        form = ImageUploadForm()
+        return render(request, "gallery/upload.html", {"form": form})
+
+    def post(self, request):
+        form = ImageUploadForm(data=request.POST, files=request.FILES)
+        if not form.is_valid():
+            return render(request, "gallery/upload.html", {"form": form})
+        object = ImageModel(image=form.cleaned_data['file'])
+        object.save()
+        return HttpResponseRedirect(reverse("gallery:index"))
+```
+### Работа с объектом FileField
+Обращаясь к полю `FileField` мы получаем набор методов, которые поддерживает файл.
+- read() - прочитать содержимое `ImageModel.objects.all()[0].image.read()`
+
+### CreteView, FormModel
+Можно создать форму загрузки на основе модели и использовать её в при создании вьюхи через класс `CreateView`
+```python
+# forms.py
+from django import forms
+from .models import ImageModel
+
+# class ImageUploadForm(forms.Form):
+#     file = forms.FileField(
+#         allow_empty_file=False,
+#         required=True,
+#         label="файл",
+        
+#     )
+
+class ImageUploadForm(forms.ModelForm):
+    class Meta:
+        model = ImageModel
+        exclude = []
+```
+```python
+# views.py
+class UploadView(CreateView):
+    template_name = 'gallery/upload.html'
+    model = ImageModel
+    form_class = ImageUploadForm
+    # fields = "__all__"
+    success_url = '/gallery'
+```
+
+## 9.4 Отображение файлов в шаблоне
+```python
+# views.py
+from django.view.generic import ListView
+
+class IndexView(ListView):
+    template_name = 'gallery/index.html'
+    model = ImageModel
+    context_object_name = 'items'
+```
+
+```html
+<img src="{{ image.image.url }}" width="100">
+```
+
+У объекта из списка, передаваемогов в шаблон есть стрибуты `.path` и `.url`.
+- `.path`  - абсолютный путь по которому файл хранится на сервере. Нету доступа у браузера.
+- `.url` - путь от корня проекта. Нету доступа по-молчанию.
+По дефолту есть доступ только к статическим файлам.
+Как получить доступ?
+
+Где забирать? - Путь по которому джанго будет отдавать статику.
+```python
+# setting.py
+
+# адрес для браузера, по которому сервер отдаёт статику
+MEDIA_URL = "/my-media/"
+```
+Что отдавать? В головном файле `urls.py`:
+```python
+# projext_folder/project_name/urls.py
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    ...
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+```
+Данная функция мапит внешнее расположение MEDIA_ROOT и путь MEDIA_URL
+Таким образом добавляется новый роут.
