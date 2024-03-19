@@ -13,6 +13,29 @@ pip3 install django
 pip3 install django==3.2
 ```
 
+## Подключение бд
+По умолчанию подключается sqlite база данных.
+Поддерживаются много разных реляционных баз данных. Чтобы изменять настройки подключения надо изменить параметр `DATABASES` в `settings.py`:
+```python
+# Database
+# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "DB_NAME",
+        "USER": "DB_USER_NAME",
+        "PASSWORD": "DB_USER_PASSWORD",
+        "HOST": "127.0.0.1",
+        "PORT": "5433",
+    }
+}
+```
+и установить драйвер для postgresql (binary версию в случае линукса)
+```shell
+pip3 install psycopg2-binary
+```
+
 После этого станет доступна команда `django-admin`.
 
 ## 1.4 Создание проекта на Django
@@ -40,7 +63,7 @@ python3 manage.py runserver 8000
 ## 1.7 Проект состоит из из приложений
 Проект в джанго стоит из приложений. Чистый проект в django уже состоит из нескольких приложений.
 Список приложений можно увидеть в настройках (файл `setup.py`) в переменной `INSTALLED_APPS`
-Для создания собственный приложений надо воспользоавться командой
+Для создания собственный приложений надо воспользоваться командой
 ```shell
 python3 manage.py startapp app_name
 ```
@@ -728,7 +751,7 @@ STATICFILES_DIRS = [
 
 ## settings.py
 ```python
-STAIC_URL = 'static/'
+STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 ```
 
@@ -771,12 +794,12 @@ def split(value, key=" ") -> list:
     return value.split(key)
 ```
 
-Для добавления фильтра в щаблон его надо загрузить при помощи тэга `{% load %}` указав имя файла без расширения.
+Для добавления фильтра шаблон его надо загрузить при помощи тэга `{% load %}` указав имя файла без расширения.
 ```html
 {% load my_filter %}
 {{ value|split:" - " }}
 ```
-Для того, чтобы гаранитровать, что в качестве водного параметра в нащ фильтр попадет строка надо навесить на функцию ещё один декоратор:
+Для того, чтобы гарантировать, что в качестве водного параметра в нащ фильтр попадет строка надо навесить на функцию ещё один декоратор:
 ```python
 # my_filters.py
 
@@ -793,7 +816,7 @@ def split(value: str, key: str = " ") -> list[str]:
 
 # 4. Базы данных. Модели. ORM
 ## 4.3 Модели
-Настройки для джанги для подключения к бд хранятся в файле `settings.py` в переменной `DATABASES`.
+Настройки для джанго для подключения к бд хранятся в файле `settings.py` в переменной `DATABASES`.
 
 Модели для ORM размещаются в файле `models.py`.
 Классы представляют таблицы в бд, а экземпляры класса являются записями в таблице.
@@ -1127,7 +1150,7 @@ SQL
 ```sql
 WHERE gender='male' OR age > 25;
 ```
-Логическое ИЛИ вернет записи где gender male ИЛИ возвраст больше 25.
+Логическое ИЛИ вернет записи где gender male ИЛИ возраст больше 25.
 
 Django
 ```python
@@ -1165,7 +1188,7 @@ Django
 Person.objects.filter(age__isnull=True)
 Person.objects.filter(age__isnull=False)
 ```
-# Еще один вариант
+##### Еще один вариант
 ```python
 Person.objects.filter(age=None)
 Person.objects.exclude(age=None)
@@ -1193,7 +1216,7 @@ Django
 Person.objects.order_by('-age')
 ```
 
-#### Создание записи в таблице или моделе
+#### Создание записи в таблице или модели
 SQL
 ```sql
 INSERT INTO Person VALUES ('Jack', '23', 'male');
@@ -1204,7 +1227,7 @@ Django
 ```python
 Person.objects.create(name='jack', age=23, gender='male')
 ```
-#### Обновление записи в моделе или таблице
+#### Обновление записи в модели или таблице
 SQL
 ```sql
 UPDATE Person SET age = 20 WHERE id = 1;
@@ -1218,7 +1241,7 @@ person.age = 20
 person.save()
 ```
 
-#### Обновление сразу нескольких записей в таблице или моделе
+#### Обновление сразу нескольких записей в таблице или модели
 SQL
 ```sql
 UPDATE Person SET age = age * 1.5;
@@ -1326,8 +1349,6 @@ Django
 ```python
 Person.objects.count()
 ```
-
-
 
 ## 4.7 Изменение и удаление записей
 Для тоо, чтобы изменить значение в поле конкретной записи, надо е     получить, присвоить полю новое значение и затем сохранить.
@@ -1594,9 +1615,10 @@ class MovieModelTestCase(TestCase):
     pass
 ```
 
-Джанго предоставляется специальный тестовый иснтурментарий в рамкх которого создается тетовая база данных.
-Тестовая база данных будет создана отдельно для каждого теста согласно настрйокам проекта и к ней будут применены все миграциии.
-После выполнения теста все теставая база данных удаляется.
+Джанго предоставляется специальный тестовый инструментарий в рамках которого создается тестовая база данных.
+Тестовая база данных будет создана отдельно для каждого теста согласно настройкам проекта и к ней будут применены все миграции.
+После выполнения теста все тестовая база данных удаляется.
+
 ### метод `setUp`
 Метод `setUp` используется в джанго для настройки тестовой среды перед выполнением каждого тестового метода.
 Выполняется автоматически перед каждым запуска теста класса `TestCase`.
@@ -1680,6 +1702,40 @@ class MovieModelTestCase(models.TestCase):
         self.print_info('Finish test_movie_budget_default_value')
 ```
 
+## 4.18 Singleton. Настройки сайта.
+Синглетон модель - класс, который может иметь только один инстанс. Бывает удобно, если надо создать настройки сайта в административной панели. Тогда для каждой настройки будет использоваться своя модель. Например модель для настроек главной страницы, отдельная модель для настроек хэдера и т.п. Каждая такая модель настроек наследуется от синглетон модели, что гарантирует, что будет только один объект в этом классе.
+```python
+#models
+
+class Singleton(models.Model):
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+    
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+class SiteSettings(Singleton):
+    title = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    address = models.CharField(max_length=200)
+    #...
+```
+В примере выше классу синглетону запрещается иметь более одного объекта, через явное указание первичного ключа при сохранении объекта.
+
+Для получения объекта при передаче во вьюху используется метод `load()`.
+
+Могут произойти проблемы при миграции, например если потребуется удалить объект этого класса, а метод удаления не будет работать.
+
 # 5. Интерфейс администратора
 ## 5.1 Admin панель
 Доступна по адресу `/admin/` через установленное приложение `django.contrib.admin`.
@@ -1700,7 +1756,7 @@ from .models import Movie
 
 admin.site.register(Movie)
 ```
-## Сменя пароля пользовтеля
+## Сменя пароля пользователя
 ```shell
 python manage.py changepassword <username>
 ```
@@ -1734,7 +1790,7 @@ admin.site.register(Director)
 ```python
 # admin.py
 from django.contrib import admin
-
+    
 class MovieAdmin(admin.ModelAdmin):
     list_display = [
         'name',
@@ -2086,7 +2142,7 @@ EMP_ID | EMP_NAME | EMP_PHONE | EMP_STATE
 ФИО | Должность | Подразделение | Описание подразделения
 -- | -- | -- | --
 Булыкин И.И. | Программист | Отдел разработки | Разработка и сопровождение приложений и сайтов
-Григорьев С.С.| Бухгалтер | Буeхгалтерия | Ведение бухгалтерского и налогового учета финансово-хозяйственной деятельности
+Григорьев С.С.| Бухгалтер | Бухгалтерия | Ведение бухгалтерского и налогового учета финансово-хозяйственной деятельности
 Анджелина Джоли | Продавец | Отдел реализации | Организация сбыта продукции
 Григорьев С.С.| Программист | Бухгалтерия | Ведение бухгалтерского и налогового учета финансово-хозяйственной деятельности
 
@@ -2294,6 +2350,7 @@ ts3 = Movie.objects.create(
 )
 ```
 Т.е. связи можно образовывать между реально существующими объектами в базе данных.
+
 ### ManyToManyField
 Связи также надо делать между существующими объектами в базе данных.
 Например нельзя добавлять актёров для фильма, который ещё не был сохранён в базе данных.
@@ -2303,8 +2360,8 @@ actor2 = Actor.objects[2]
 ts3.actors.add(actor1)  # добавляем актёра1
 ts3.actors.add(actor2)  # добавляем актёра2
 
-ts3.actors.remove(actor1)   # удаляем акётра
-ts3.actors.remove(actor1)   # ещё раз удаляем - ошибкине будет
+ts3.actors.remove(actor1)   # удаляем актёра
+ts3.actors.remove(actor1)   # ещё раз удаляем ошибки не будет
 ```
 
 ## 6.7 Связь один-к-одному
@@ -2335,7 +2392,7 @@ dressing_room_actor = d.actor   # получаем объект актера п�
 
 a = Actor.objects.all()[0]
 a.dressing_room = d
-a.save()    # поулчим ошибку, т.к. это связь 1-к-1, а гримерка уже связана
+a.save()    # поолучим ошибку, т.к. это связь 1-к-1, а гримерка уже связана
 ```
 
 ```python
@@ -2345,6 +2402,7 @@ a.save()    # поулчим ошибку, т.к. это связь 1-к-1, а �
 class DressingRoomAdmin(admin.ModelAdmin):
     list_display = ['floor', 'number', 'actor']
 ```
+
 ## Модель комментария
 Предположим надо создать комментарий к посту
 ```python
@@ -2479,7 +2537,7 @@ class PostView(View):
 ```
 #### Удаление комментария
 для удаления комментария нужен роут для удаления и его id.
-Ид будем получать у тех комментариев, которые соответствеют текущему пользовтели и который совппадает с владельцем коммантария
+Ид будем получать у тех комментариев, которые соответствуют текущему пользователю и который совпадает с владельцем комментария
 ```html
 {% if user.is_authenticated and comment.user == user %}
 <a href="{% url 'myblog:comment_delete' comment.id %}">
@@ -2487,7 +2545,7 @@ class PostView(View):
 </a>
 {% endif %}
 ```
-Т.е. в шаблоне ричуем кнопку тем ользовтелям, у кого она будет работать.
+Т.е. в шаблоне причем кнопку тем пользователям, у кого она будет работать.
 
 Во вь.хе пишем обработчик get запроса.
 ```python
@@ -2500,7 +2558,7 @@ class CommentDelete(View):
             comment.delete()
         return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
 ```
-В нём мы получаем ид комментария, достаем пользвотеля, проверяем их соотвествие и удяляем комментарий.
+В нём мы получаем ид комментария, достаем пользователя, проверяем их соответствие и удаляем комментарий.
 
 # 7. Формы и Class-Based Views
 ## 7.2 Создание формы
@@ -2644,7 +2702,7 @@ class FeedbackForm(forms.Form):
             "class": "my-class"
         }),
     )
-    # необяхательный метод
+    # необязательный метод
     # вызывается при валидации формы is_valid
     def clean(self):
         password = self.cleaned_data.get("password")
@@ -4190,3 +4248,844 @@ class TagView(View):
         common_tags = Post.tag.most_common()
         ...
 ```
+### django-rest-framework
+https://github.com/glemmaPaul/django-taggit-serializer
+
+Для работы `taggit` с drf нужен `taggit-serializer`:
+```shell
+pip3 install django-taggit-serializer
+```
+добавляем в `settings.py`
+```python
+# settings
+
+INSTALLED_APPS = [
+    ...,
+    'taggit',
+    'taggit_serializer',
+]
+```
+#### Ошибка ‘ugettext_lazy’
+```
+ImportError: cannot import name ‘ugettext_lazy’ from ‘django.utils.translation’
+```
+
+Вылечилась заменой  `from django.utils.translation import ugettext_lazy as _` на `from django.utils.translation import gettext_lazy as _` в файле `myvenv\lib\site-packages\taggit_serializer\serializers.py`.
+
+# 6. Django Rest Framework
+REST (Representational State Transfer — «передача состояния представления») — архитектурный стиль взаимодействия компонентов распределённого приложения в сети. REST представляет собой согласованный набор ограничений, учитываемых при проектировании распределённой гипермедиа-системы. В определённых случаях (интернет-магазины, поисковые системы, прочие системы, основанные на данных) это приводит к повышению производительности и упрощению архитектуры.
+
+## 6.2 Установка и настройка
+```shell
+django-admin startproject api
+cd api
+python manage.py startapp core
+```
+
+вставляем в settings py:
+```python
+INSTALLED_APPS = [
+    ...,
+    "core",
+]
+
+LANGUAGE_CODE = "ru-ru"
+TIME_ZONE = "Europe/Moscow"
+STATIC_URL = "/static/"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+``` 
+создаём миграции и супервользователя
+```shell
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+### Установка drf
+Установим
+- https://www.django-rest-framework.org/ - сам фреймворк
+- https://django-rest-framework-simplejwt.readthedocs.io/en/latest/ - simplejwt
+- https://github.com/adamchainz/django-cors-headers - cors headers
+
+```shell
+pip install djangorestframework
+pip install djangorestframework-simplejwt
+pip install django-cors-headers
+```
+
+После установки добавим `rest_framework` в `INSTALLED_APPS`  и остальные настройки
+```python
+from datetime import timedelta
+
+INSTALLED_APPS = [
+    'core',
+    'rest-framework',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # <- добавьте это именно сюда
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+
+# ниже настройки JWT токена
+LOGIN_URL = "/api/v1/signin"
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=2),
+}
+
+# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
+# конец настроек JWT токена
+
+
+# настройки rest framework
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
+    ],
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.DjangoModelPermissions",
+    ),
+}
+# конец настроек rest-framework
+```
+__django-cors-headers__ - данная библиотека позволяет обращаться к вашему django api из других доменов.
+Тут суть в том, что на одной локальной машине сразу 2 приложения запущено на разных портах (это как будто 2 совершенно разных адреса). Одно по адресу `http://127.0.0.1:8000/` с портом 8000 (назовем его `api`) и второе по адресу `http://127.0.0.1:8080/`. Так вот по умолчанию браузер не даст вам обратиться от одного к другому и вы в консоли увидите такую ошибку.
+
+Для того чтобы их связать нужен Access-Control-Allow-Origin заголовок. Именно его и обеспечивает данная библиотека.
+
+У нас на 3000 порту будет запускаться фронтэнд, который должен обращаться к api.
+
+### Аутентификация JWT token
+https://django-rest-framework-simplejwt.readthedocs.io/en/latest/getting_started.html
+
+```python
+# urls.py
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenRefreshView
+
+urlpatters = [
+    path('api/token/', TokenObtainPairView.as_view(), name='token'),
+    path('api/token_refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+]
+```
+На url `api/token/` пользователь будет отправлять логин и пароль и получать jwt токен для авторизации.
+Адрес `api/token_refresh/` отвечает за обновление токена, согласно настройкам времени жизни токена в секции `settings.SIMPLE_JWT`.
+
+Система генерирует два токена `access` и `refresh`. У каждого своё время жизни. Обычно у рефреш токена она длиннее. Когда время жизни `access` токена подходит к концу, система отправляет запрос на адрес `api/refresh_token` отправляя в поле авторизации токен `refresh` и получает обновленный `access` токен.
+
+## 6.3 Посты
+
+### Создаём модель поста
+```python
+# models.py
+from django import models
+
+class Post(models.Model):
+    pass
+```
+
+### Создание сериализатора
+
+https://habr.com/ru/companies/yandex_praktikum/articles/561696/
+
+https://www.django-rest-framework.org/api-guide/serializers/
+
+Сериализаторы нужны для преобразования моделей их бд в json и обратно
+```python
+# app_name/serializers.py
+
+from rest_framework import serializers
+from django.contrib.auth.models import User
+from taggit_serializer.serializers import TaggitSerializer
+from taggit_serializer.serializers import TagListSerializerField
+from .models import Post
+
+
+class PostSerializer(TaggitSerializer, serializers.ModelSerializer):
+    tags = TagListSerializerField()
+    author = serializers.SlugRelatedField(
+        slug_field="username",
+        queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = Post
+        # fields = "__all__" # или так
+        fields = (
+            "id",
+            "title",
+            "description",
+            "content",
+            "image",
+            "created_at",
+            "author",
+            "tags",
+        )
+        lookup_field = 'slug'
+        extra_kwargs = {
+            'url': {'lookup_field': 'slug'}
+        }
+```
+
+в объекте `rest_framework.serializers` находятся разные вариации сериализаторов.
+`ModelSerializer` - класс сериализатора на основе класса модели.
+Создание сериализатора очень похоже на создание формы на основе модели.
+`PostSerializer` - наш класс сериализатора на основе `TaggitSerializer` и `serializers.ModelSerializer`.
+Порядок классов от которых наследуемся тут важен.
+
+`tags = TaggitSerializerField()` - добавляет поле специального типа
+
+Для поля автора, если мы будем получать просто данные из модели то мы получим в ответ `id` объекта. А нам нужен `username`. Это так называемые вложенные отношения,когда у нашей модели есть поля, которые ссылаются на другие модели https://www.django-rest-framework.org/api-guide/relations/#nested-relationships.
+
+```python
+author = serializers.SlugRelatedField(
+    slug="username", queryset=User.objects.all()
+)
+```
+#### extra_kwargs
+В extra_kwargs для каждого поля задаётся набор опций.
+
+`lookup_field` определяет имя для поля, по которому будет искаться конкретная запись.
+По умолчанию поиск ведётся по `id`, но мы изменим его на `slug`
+```python
+lookup_field = 'slug'
+extra_kwargs = {
+    'url': {'lookup_field': 'slug'},
+}
+```
+
+Ключами выступают любые поля не запрещенные в (exclude) поля модели.
+
+Значение для каждого ключа - словарь с атрибутами, которыми нужно дополнить то или иное поле сериализатора.
+
+Т.е. тут мы создаем в сериализаторе новое генерирумое поле `url`, которое получается из поля `slug`. Т.е. фактически получается переименования поля slug в url.
+
+Мы обращаемся по какому-то `url` к нашему api, этот `url` обрабатывает какая-nj вьюха. А во вьюхе определён сериализатор, которые берёт данные из базы данных в соответствии с настройками сериализатора возвращает нам json.
+
+Дополнительные свойства
+- `write_only` - поле используется __только при валидации__, т.е. при получении и проверки данных. При отправки данных пользователю данное поле не фигурирует.
+
+### Создание view
+Есть несколько способов создавать вьюхи 
+- class Based View (https://www.django-rest-framework.org/tutorial/3-class-based-views/#tutorial-3-class-based-views)
+- функция с декоратором `@api_view`
+- на основе ViewSets
+
+view на основе viewsets.ModelViewSet позволяет создавать не только роуты для одного экземпляра сущности, но сразу и роут для списка элементов. Таким образом через ViewSet можно получить как один элемент (один Post), так и сразу несколько постов.
+
+```python
+class PostViewSet(viewsets.ModelViewSet):
+```
+Далее мы указываем сериализатор для работы с моделью Post.
+```python
+serializer_class = PostSerializer
+```
+И определяем queryset из множества, которое будем возвращать.
+И указываем поле, по которому будет происходить поиск модели в queryset
+```python
+lookup_field = 'slug'
+```
+Итого
+```python
+# app_name/views.py
+from rest_framework import viewsets
+from rest_framework.response import Response
+from .models import Post
+from .serializers import PostSerializer
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    lookup_field = 'slug'
+```
+
+#### класс APIView
+```python
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import Post
+from .serializers import PostSerializer
+
+class Post(APIView):
+    def get(self, request):
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
+        return Response({"posts": serializer.data})
+```
+
+#### декоратор @api_view
+```python
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
+from rest_framework import permissions
+
+
+@api_view(["GET"])
+@permission_classes([permissions.AllowAny])
+def get_index(request):
+    return Response({"message": "Hello, api_view decorator index!"})
+```
+
+#### GenericApiView
+Наследуется от класса `APIView` и добавляет обычный функционал для списка и детального вида.
+```python
+from rest_framework.generics import APIView
+```
+
+https://www.django-rest-framework.org/api-guide/generic-views/#genericapiview
+
+Basic settings:
+
+- `queryset` - The queryset that should be used for returning objects from this view. Typically, you must either set this attribute, or override the get_queryset() method. If you are overriding a view method, it is important that you call get_queryset() instead of accessing this property directly, as queryset will get evaluated once, and those results will be cached for all subsequent requests.
+- `serializer_class` - The serializer class that should be used for validating and deserializing input, and for serializing output. Typically, you must either set this attribute, or override the get_serializer_class() method.
+- `lookup_field: str` - The model field that should be used for performing object lookup of individual model instances. Defaults to 'pk'. Note that when using hyperlinked APIs you'll need to ensure that both the API views and the serializer classes set the lookup fields if you need to use a custom value.
+- `lookup_url_kwarg: str` - 'pk' - The URL keyword argument that should be used for object lookup. The URL conf should include a keyword argument corresponding to this value. If unset this defaults to using the same value as lookup_field.
+
+__Pagination:__
+- `pagination_class` - The pagination class that should be used when paginating list results. Defaults to the same value as the DEFAULT_PAGINATION_CLASS setting, which is `rest_framework.pagination.PageNumberPagination`. Setting `pagination_class=None` will disable pagination on this view.
+
+__Filtering:__
+`filter_backends` - A list of filter backend classes that should be used for filtering the queryset. Defaults to the same value as the `DEFAULT_FILTER_BACKENDS` setting.
+
+#### ListApiView
+https://www.django-rest-framework.org/api-guide/generic-views/#listapiview
+
+```python
+from rest_framework.generics import ListAPIView
+```
+
+пригодится, когда надо вывести список объектов, например результаты поиска
+Наследуется от GenericApiView и реализует функционал метода get по отношению к списку элементов.
+
+### Создание urls
+Всю магию работы с роутами берёт на себя [DefaultRouter](https://www.django-rest-framework.org/api-guide/routers/).
+```python
+# app_name/urls.py
+from django.urls import path
+from django.urls import include
+from rest_framework.routers import DefaultRouter
+from .views import PostViewSet
+
+router = DefaultRouter()
+router.register('posts', PostViewSet, basename='posts')
+
+urlpatterns = [
+    path("", include(router.urls),)
+]
+```
+
+### Тестирование API
+можно тестировать при помощи Talend API tester - расширения для браузера или Постмана или  Thunder Client (VSCode plugin).
+Сначала делаем post запрос на `http://127.0.0.1:8000/api/token` - путь для получения токена. 
+В ответ получим, что нам нужен обязательно username и password.
+Хорошо, отправляем в теле запроса логин и пароль.
+В итоге в ответе от сервера получим и токен доступа и токен для обновления `access` и `refresh`:
+```json
+{
+"refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcwOTE1NTYyNiwiaWF0IjoxNzA4OTgyODI2LCJqdGkiOiJhZTk1YzQ4MTZlYmU0YTg4YjM0YWYzYjYwNDNlNjk1OCIsInVzZXJfaWQiOjF9.wsmd28lpW_OLtqMshCkn9rf1_krS4xQS8jS0PWjvGDI",
+"access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzA4OTg2NDI2LCJpYXQiOjE3MDg5ODI4MjYsImp0aSI6ImZhMDJmNzNkZDUxNTRjOGY4MTZhYzE1Y2JiODlkNjY1IiwidXNlcl9pZCI6MX0.iNUdgmwco8N6QMx4Mv_naCdR8Ey2M9lMvcaBIg1C2HY"
+}
+```
+В постмане можно писать скрипты в разделе Tests, которые заполняет созданные переменные.
+```js
+const requests = pm.request.json();
+pm.environment.set('access', request.access);
+pm.environment.set('refresh', request.refresh);
+```
+Таким образом после выполнения запроса по получению двух токенов их можно установить в переменные окружения env и затем использовать в проектах.
+
+
+### Заполнение из яндекс рефератов
+https://github.com/Ulbwaa/YandexImagesParser
+
+```python
+from datetime import datetime
+from YandexImagesParser.ImageParser import YandexImage
+from bs4 import BeautifulSoup as bs
+from random import randint, sample
+from transliterate import translit
+import os
+import django
+import requests
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Django_blog_project_REST_API.settings")
+django.setup()
+
+from django.contrib.auth.models import User
+from core.models import Post
+
+
+list_abstract = []
+parser = YandexImage()
+images = iter(parser.search("astronomy", sizes=parser.size.medium))
+
+while len(list_abstract) < 20:
+    URL_TEMPLATE = f"https://yandex.ru/referats/?t=astronomy&s={randint(10000, 99999)}"
+    r = requests.get(URL_TEMPLATE)
+
+    if r.status_code != 200:
+        continue
+
+    soup = bs(r.text, "html.parser")
+    referat = soup.find('div', class_='referats__text')
+    text = referat.find_all('p')
+    img_b = ''
+    refer_image = images.__next__()
+
+    while True:
+        if refer_image.url[-4:] != '.jpg':
+            refer_image = images.__next__()
+            continue
+        try:
+            img_b = requests.get(refer_image.url)
+        except:
+            refer_image = images.__next__()
+            continue
+        break
+
+    with open(f'media/{str(refer_image.url).split("/")[-1]}', 'wb') as img:
+        img.write(img_b.content)
+
+    list_abstract.append(
+        {
+            'h1': referat.find('strong').get_text()[7:-1],
+            'title': referat.find('strong').get_text()[7:-1],
+            'slug': translit(referat.find('strong').get_text()[7:-1], language_code='ru', reversed=True).replace(
+                ' ',
+                '-'),
+            'description': text[0].get_text(),
+            'content': ''.join([p.get_text() for p in text]),
+            'created_at': str(datetime.now().date()),
+            'image': str(refer_image.url).split('/')[-1],
+            'author': User.objects.get(username='root'),
+        }
+    )
+
+tags_list = ['astronomy', 'asteroid', 'dark matter', 'gas giant', 'hypernova', 'mass', 'nova', 'meteor', 'pulsar', 'planetoid']
+
+for post in list_abstract:
+    b = Post(**post)
+    b.save()
+    b.tags.add(*sample(tags_list, 2))
+    b.save()
+```
+
+### Права доступа к API
+https://www.django-rest-framework.org/api-guide/permissions/
+
+На нашем сайте не нужно авторизоваться, чтобы получить список постов. Хотя по-умолчанию апи запрашивает авторизацию.
+Надо к вьюхе добавить список прав, чтобы любой пользователь могу получить доступ к нейЖ
+```python
+# app_name/views.py
+
+from rest_framework import viewsets
+from rest_framework import permissions
+from .serializers import PostSerializer
+from .models import Post
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    lookup_field = 'slug'
+    permission_classes = [permissions.AllowAny]
+
+```
+- `IsAuthenticatedOrReadOnly`
+- `AllowAny`
+- `IsAuthenticated`
+- `IsAdminUser`
+- `DjangoModelPermissions`
+- ...
+
+Можно прописать дефолтные разрешения для всех вью сразу в файле `settings.py`
+(по умолчанию и применяется AllowAny, если нет иного значения)
+```python
+# setting.py
+REST_FRAMEWORK = {
+"DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny",]
+}
+```
+
+## 6.4 Пагинация PageNumberPagination
+```python
+from rest_framework.pagination import PageNumberPagination
+
+
+class PageNumberSetPagination(PageNumberPagination):
+    page_size = 4
+    page_size_query_name = "page_size"
+    ordering = "created_at"
+
+
+class Posts(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    lookup_field = "slug"
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberSetPagination
+```
+ После этого будет доступно два параметра для этой вь.хи - `page` и `page_size`.
+
+## 6.5 Тэги
+### Поиск по тэгам
+```python
+# urls.py
+
+urlpatterns = [
+    ...,
+    path("tag/<slug:slug_key>/", TagView.as_view(),)
+]
+```
+
+```python
+# views.py
+from rest_framework import permissions
+from rest_framework.generics import ListAPIView
+from .models import Post
+from .serializers import PostSerializer
+
+class PageNumberSetPagination:
+    ...
+
+class TagView(ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberSetPagination
+
+    def get_queryset(self):
+        slug_text = self.kwargs.get("slug_key")
+        if slug_text is None:
+            return []
+        tag = Tag.objects.get(slug=slug_text.lower())
+        posts = Post.objects.filter(tags=tag)
+        return posts
+```
+Здесь мы переопределяем стандартный метод `get_queryset`.
+
+
+### Список тэгов
+Создадим сериализатор
+```python
+#serializers.py
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        lookup_field = "name"
+        fields = ("name", "slug",)
+        extra_kwargs = {"url": {"lookup_field": "name"}}
+```
+
+Cоздадим вьюху, которая будет отдавать список тэгов через сериализатор
+```python
+# views.py
+
+class TagListView(ListAPIView):
+    serializer_class = TagSerializer
+    permissions = [permissions.AllowAny]
+    queryset = Tag.objects.all()
+```
+
+Создадим роут
+```python
+urlpatterns = [
+    ...,
+    path("tags/", TagListView.as_view(), name="tags")
+]
+```
+## 6.6 Последние 5 постов
+Эта api будет использоваться для вывода последних 5ти постов.
+Можно явно указать что не будет пагинации. Но все равно выводим всего 5 записей.
+```python
+class AsideView(ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permission.AllowAny]
+    # pagination_class = None
+    queryset = Post.objects.all().order_by("-created_at")[:5]
+```
+Добавим роут и готово.
+
+## 6.7 Форма обратной связи
+### Настройка отправки почты
+Для создания формы обратной связи нужно создать почтовый ящик и разрешить через него отправку писем. Можно посмотреть мануал настройки gmail по [ссылке](https://stepik.org/lesson/442694/step/1?unit=432865).
+
+После этого надо добавить в файл `settings.py` следующие константы
+```python
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'   # smtp сервер
+EMAIL_USE_TLS = True    
+EMAIL_PORT = 587    # smtp порт
+EMAIL_HOST_USER = 'Ваша почта'  # логин от почты
+EMAIL_HOST_PASSWORD = 'Пароль который вы только что получили' # пароль
+```
+
+__!Важно__ Нужно производить валидацию всех данных, присланных от пользователя. Тут это будет опущено.
+
+### Создание сериализатора для данных
+Его можно создать на основе класса ModelSerializer, если есть модель. Предположим, что мы будем сохранять все отзывы в бд, а потом их отправлять. Тогда создадим также и модель для бд:
+
+```python
+# serializers.py
+
+class FeedbackSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=50)
+    email = serializers.EmailField()
+    subject = serializers.CharField(max_length=100)
+    message = serializers.CharField(max_length=300)
+    created_at = serializers.DateTimeField(read_only=True)
+```
+
+### Модель для сохранения данных формы
+```python
+# models.py
+
+class Feedback(models.Model):
+    name = models.CharField(max_length=50)
+    email = models.EmailField()
+    subject = models.CharField(max_length=100)
+    message = serializers.TextField()
+    created_at = serializers.DateTimeField(auto_now_add=True)
+```
+
+### view для сохранения формы
+```python
+# views.py
+
+from django.core.mail import send_mail
+from rest_framework.response import Response
+
+class FeedbackView(APIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = Feed
+
+    def post(self, request):
+        serializer = FeedbackSerializer(request.data)
+        if serializer.is_valid():
+            feedback = Feedback.objects.create(**serializer.validated_data)
+            name = feedback.get("name")
+            from_email = feedback.get("email")
+            subject = feedback.get("subject")
+            message = feedback.get("message")
+            send_mail(
+                f"От {name} | {subject}",
+                message,
+                from_email,
+                ['adminemail@admin.com']
+            )
+            return Response(
+                {
+                    "status": "success",
+                    "data": FeedbackSerializer(feedback).data,
+                }
+            )
+        return Response({"status": "error", "message": "wrong data"})
+```
+
+## 6.8 поиск Постов через API. SearchFilter
+https://www.django-rest-framework.org/api-guide/filtering/
+
+Хотя можно выполнять фильтрацию вручную, у DRF есть замечательные фильтры.
+
+Фильтры можно использовать с классами GenericAPIView.
+
+### APIView - вручную
+Можно написать класс на основе APIView, который будет получать из response query параметр и выдавать ответ:
+```python
+class SearchPost(APIView):
+    def get(self, request):
+        query = self.request.query_params.get("q")
+        if query is None:
+            return Response([])
+        posts = Post.objects.filter(
+            Q(title__iregex=query)
+            | Q(content__iregex=query)
+            | Q(author__username__iregex=query)
+        )
+        return Response(PostSerializer(posts, many=True).data)
+```
+### ModelViewSet SearchFilter
+https://www.django-rest-framework.org/api-guide/filtering/#searchfilter
+
+Можно добавить несколько параметров уже существующей вьюхе на основе ModelViewSet.
+```python
+# views.py
+from rest_framework import filters
+from rest_framework import viewsets
+
+class PostViewSet(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+    lookup_field = "slug"
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberSetPagination
+    search_fields = ["$title", "$content", "$author__username"]
+    filter_backends = [filters.SearchFilter]
+```
+Здесь `SearchFilter` - это фильтр, который ищет по query запросам https://www.django-rest-framework.org/api-guide/filtering/#searchfilter.
+Для поиска по-умолчанию используется ключевое слово `search`. Чтобы его изменить нужно в settings.py внести изменения:
+```python
+# settings.py
+
+REST_FRAMEWORK = {
+    'SEARCH_PARAM': 'q'
+}
+```
+Поведение поиска может быть ограничено добавлением различных символов к search_fields.
+
+- `^` Начинается с поиска.
+- `=` Точные совпадения.
+- `@` Полнотекстовый поиск. (В настоящее время поддерживается только серверная часть Django PostgreSQL .)
+- `$` Поиск по регулярному выражению.
+Погуглив немного, пришел к выводу, что добавив `$`, можно решить такую проблему:
+
+`search_fields = ['$content', '$h1']` - тогда проблема регистра решена и поиск отдает результаты с любым регистром.
+
+## 6.9 Регистрация и профиль
+### Регистрация
+Для создания регистрации надо создать сериалайзер, вьюху для регистрации и url.
+
+### Сериализатор
+```python
+# serializers.py
+from django.contrib.auth.models import User
+from rest-framework import serializers
+class RegisterSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(
+        max_length=128,
+        min_length=6,
+        write_only=True,
+        required=True,
+    )
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password', 'password2')
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'email': {'required': True},
+        }
+
+        def create(self, validated_data):
+            username = validated_data.get("username")
+            email = validated_data.get("email")
+            password = validated_data.get("password")
+            password2 = validated_data.get("password2")
+            if password != password2:
+                raise serializers.ValidationError({
+                    'password': "Passwords do not match"
+                })
+            user = User(
+                username=username,
+                email=email,
+            )
+            user.set_password(password)
+            user.save()
+            return user
+```
+Здесь создаем сериализатор, Который принимает дополнительное поле password2, являющееся обязательным. Затем для полей паролей выключается сериализация (остаётся только валидация write_only=True). И добавляется условие обязательности для поля `email`.
+
+Создаем в сериализаторе отдельный метод `create`, который будем вызывать во вьюхе для создания записи в базе данных.
+
+Если мы захотим создать сериализатор для вывода вех данных пользователя, то наш сериализатор будет выглядеть вот так:
+```python
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = "__all__"
+
+class UserView(ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.isAdminUser]
+    queryset = User.objects.all()
+```
+
+### View
+```python
+# views.py
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import permissions
+
+
+class RegisterView(generics.GenericAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=self.request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(
+            {
+                "user": UserSerializer(
+                    user, context=self.get_serializer_context()
+                ).data,
+                "message": "пользователь успешно создан",
+            }
+        )
+```
+`serializer.is_valid(raise_exception=True)` - проверяет данные на валидность и в случае ошибки появляется исключение.
+
+
+или мой вариант на APIView
+```python
+# views.py
+
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=self.request.data)
+        if serializer.is_valid():
+            serializer.create(validated_data=serializer.validated_data)
+            return Response(serializer.data)
+        return Response(serializer.errors)
+```
+
+## 6.10 Комментарии
+Для создания комментариев к постам нужно создать модель комментария
+```python
+#models.py
+
+```
+
+### Профиль
+```python
+# views.py
+
+class UserProfileView(generic)
+```
+
+
+
+
+## Django web sockets
+https://realpython.com/getting-started-with-django-channels/
+## Django + Ajax polling
+https://testdriven.io/blog/django-and-celery/#workflow
+
+
+## Docker-compose
+```yml
+version: "3"
+
+services:
+    redis:
+        docker pull redis:7.2.4-alpine3.19
+
+```
+
