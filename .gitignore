@@ -1,0 +1,7 @@
+__pycache__/
+.vscode/
+*.env
+*.ipynb
+django-web-store/
+django-projects/
+.venv/

@@ -101,7 +101,7 @@ urlpatterns = [
 При этом будет получено status код 301, если клиент зашел на ссылку без слеша. В этом случае браузер перенаправит пользователя на адрес со слешем на конце.
 
 ### views
-Теперь надо определеить представление, которое будет срабатывать при переходе по новому url.
+Теперь надо определить представление, которое будет срабатывать при переходе по новому url.
 создадим нужное представление в файле `views.py`.
 ```python
 #vies.py
@@ -133,7 +133,7 @@ https://django.fun/ru/docs/django/4.1/topics/http/urls/
 ```python
 # project_folder/urls.py
 from django.urls import include
-from django.url import path
+from django.urls import path
 
 urlpatterns = [
     path('horoscope/', include('app_name.views')),
@@ -441,7 +441,7 @@ Django поддерживает кроме своего шаблонизатор
 Шаблон в джанге - это статические html файл, который состоит из статических частей и динамических.
 
 Шаблоны создаются в каталоге приложения в директории `templates/`.
-По договоренности внутри создается еще один каталог с именен приложений.
+По договоренности внутри создается еще один каталог с именами приложений.
 Например валидное такое название файла: `django_project/app_name/templates/app_name/app_name_index.html`.
 
 Ещё может понадобиться зарегистрировать свой шаблон в файле `settings.py`.
@@ -617,7 +617,7 @@ print(slug)
 {% endfor %}
 ```
 
-Можно объодить значения в обратном порядке:
+Можно обходить значения в обратном порядке:
 ```python
 {% for i in list reversed %}
 ```
@@ -686,6 +686,9 @@ print(slug)
 {% endblock %}
 ```
 ## 3.8 Тэг `include`
+помещать в `app_name/templates/app_name/includes/include.html`
+
+
 Позволяет включать один шаблон в другой.
 По умолчанию создается каталог `templates/app_name/includes`, в который помещается шаблон, например следующей структуры:
 ```html
@@ -736,6 +739,8 @@ https://docs.djangoproject.com/en/5.0/howto/static-files/
 - `css/`
 - `js/`
 - `img/`
+
+Т.е. результирующий путь `app_name/static/app_name/css/style.css`.
 
 ### global static
 Глобальную статику, относящуюся ко всему проекту целиком принято выносить в каталог с проектом - `project_folder/static/`.
@@ -1703,6 +1708,8 @@ class MovieModelTestCase(models.TestCase):
 ```
 
 ## 4.18 Singleton. Настройки сайта.
+https://globaldev.tech/blog/practical-application-singleton-design-pattern
+
 Синглетон модель - класс, который может иметь только один инстанс. Бывает удобно, если надо создать настройки сайта в административной панели. Тогда для каждой настройки будет использоваться своя модель. Например модель для настроек главной страницы, отдельная модель для настроек хэдера и т.п. Каждая такая модель настроек наследуется от синглетон модели, что гарантирует, что будет только один объект в этом классе.
 ```python
 #models
@@ -1903,7 +1910,7 @@ class MovieAdmin(admin.ModelAdmin):
 
     @admin.action(description="Валюта в долларах")
     def set_dollars(self, request, query_set: QuerySet):
-        count = querySet.update(currency=Movie.DOLLARS)
+        count = query_set.update(currency=Movie.DOLLARS)
         self.message_user(request, f"Изменено {count} фильмов")
 ```
 Полученное значение измененных записей можно использовать для отправки сообщений пользователю через метод `self.message_user(request, message: str)`.
@@ -2562,7 +2569,7 @@ class CommentDelete(View):
 
 # 7. Формы и Class-Based Views
 ## 7.2 Создание формы
-## 7.3  GET и POST запросы. CSRF
+    ## 7.3  GET и POST запросы. CSRF
 
 Форма отправляет запросы двух видов: GET и POST.
 ### GET
@@ -3746,6 +3753,8 @@ urlpatterns = [
 10. # Аутентификация, Регистрация, Авторизация
 
 ## Встроенная регистрация и аутентификация Django (от Никиты)
+Джанго предоставляет методы `login` и `logout` из коробки.
+
 
 Во первых, создаем отдельное приложение.
 Предположим назовем его - `users`:
@@ -3782,6 +3791,9 @@ urlpatterns = [
 ]
 ```
 
+Таким образом у нас будет подключены `login`, `logout` и `register`.
+Надо создать для них шаблоны.
+
 Создаем шаблоны в данном приложении, для регистрации и логина.
 
 `Внимание!` - шаблон для `login` нужно расположить в папке `users/templates/registration/`
@@ -3811,6 +3823,15 @@ class RegisterView(View):
         return render(request, 'users/registration.html', {'form': form})
 ```
 
+Для выполнения `logout` надо отправить `POST` запрос на `logout` URL.
+Например через форму с методом `POST` на `logout` URL:
+```python
+<form action="{% url 'users:logout' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Выйти">
+</form>
+```
+
 ### Код html шаблонов.
 `Регистрация`
 ```html
@@ -3826,7 +3847,9 @@ class RegisterView(View):
 {% endblock %}
 ```
 
+
 `Логин`
+путь по умолчанию `templates/registration/login.html`
 ```html
 {% extends 'bitbucket_app/base.html' %}
 
@@ -5056,12 +5079,7 @@ class RegisterView(APIView):
         return Response(serializer.errors)
 ```
 
-## 6.10 Комментарии
-Для создания комментариев к постам нужно создать модель комментария
-```python
-#models.py
 
-```
 
 ### Профиль
 ```python
@@ -5071,6 +5089,92 @@ class UserProfileView(generic)
 ```
 
 
+
+## 6.10 Комментарии
+Для создания комментариев к постам нужно создать модель комментария.
+
+### Модель комментария
+```python
+#models.py
+class Comment(models.Model):
+    user = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    post = models.ForeignKey(
+        to=Post,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+```
+
+### Сериализатор модели комментария
+Теперь сериализатор для модели
+```python
+# serializers.py
+class CommentSerializer(serializers.ModelSerializer):
+    post = serializers.SlugRelatedField(
+        slug_field="title",
+        queryset=Post.objects.all(),
+    )
+    user = serializers.SlugRelatedField(
+        slug_field="username",
+        queryset=User.objects.all(),
+    )
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "text",
+            "created_at",
+            "user",
+            "post",
+        ]
+```
+В сериализаторе комментариев переопределяем два поля - `user` и `post`, чтобы получать на выходе не id, а имя пользователя и заголовок поста.
+
+### View для комментариев. ListAPIView, ListCreateAPIView
+```python
+# views.py
+class CommentListView(ListAPIView):
+    model = Comment
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.AllowAny]
+    queryset = Comment.objects.all()
+```
+
+Это простая вьюха для вывода все комментариев.
+Но нам не нужна вью для всех комментариев, тК их слишком много. 
+Сделаем view для вывода комментария к определенному посту.
+Создадим её на основе класса `ListCreateAPIView`.
+Данный класс выводит список объектоа и позволяет создавать новые объекты. Наследуется он от класса `APIView`.
+```python
+# views.py
+class CommentView(ListCreateAPIView):
+    model = Comment
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        post_slug = self.kwargs.get("post_slug")
+        post = Post.objects.get(slug=post_slug)
+        comments = Comment.objects.filter(post=post)
+        return comments
+```
+Мы переопределили метод `get_queryset`, чтобы получать комментарии к указанному посту.
+```python
+# urls.py
+
+urlpatterns = [
+    ...,
+    path("comments/", CommentListView.as_view(),),
+    path("comments/<slug:post_slug>/", CommentView.as_view(),),
+]
+```
 
 
 ## Django web sockets
@@ -5089,3 +5193,5 @@ services:
 
 ```
 
+# 2 Джанго интернет магазин
+https://www.youtube.com/watch?v=w-ITLbRfhnA&t=3788s
