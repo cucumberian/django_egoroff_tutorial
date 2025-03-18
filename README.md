@@ -1,21 +1,32 @@
-# 1
+# Django
 
-## 1.1 Что такое джанго
+## 1
+
+### 1.1 Что такое джанго
 
 Джанго - фреймворк. Фреймворк - типовое решение для решения типовых проблем.
-## Установка Django
+
+### 1.2 Установка Django
+
 Установка последней версии
+
 ```shell
 pip3 install django
 ```
+
 Установка определённой версии
+
 ```shell
-pip3 install django==3.2
+pip3 install django==4.2
 ```
 
-## Подключение бд
+Для установки лучше выбирать LTS версию джанго. Текущую версию с длительным сроком поддержки лучше посмотреть на оф сайте https://www.djangoproject.com/download/.
+
+### 1.3 Подключение бд
+
 По умолчанию подключается sqlite база данных.
 Поддерживаются много разных реляционных баз данных. Чтобы изменять настройки подключения надо изменить параметр `DATABASES` в `settings.py`:
+
 ```python
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -31,48 +42,63 @@ DATABASES = {
     }
 }
 ```
+
 и установить драйвер для postgresql (binary версию в случае линукса)
+
 ```shell
 pip3 install psycopg2-binary
 ```
 
 После этого станет доступна команда `django-admin`.
 
-## 1.4 Создание проекта на Django
+### 1.4 Создание проекта на Django
+
 ```shell
 django-admin startproject project_name
 ```
+
 При этом создастся в одноименный каталог с файлом с именем `manage.py` и внутри ищё один каталог с именем проекта.
 
-# 1.5 Состав проекта
+### 1.5 Состав проекта
+
 - `manage.py` - не стоит менять этот файл. Этот файл используется в командной строке для внесения изменений в джанго-проект. Он принимает на вход аргументы, обрабатывает их и изменяет проект.
 - `__init__.py` - пустой, служит для того, чтобы каталог с ним стал питоновским пакетом.
 - `asgi.py`, `wsgi.py` - необходимы при деплое проекта.
 - `setting.py` - содержит константы, отвечающие за настройки всего проекта.
 - `url.py` - регистрирует все страницы для сайта.
 
-## 1.6 Запуск сервера
+### 1.6 Запуск сервера
+
 Файл `manage.py` делает то же, что и `django-admin`, но подставляет нужные переменные окружения.
 По
 тому запускает этот файл через интерпретатор питона
+
 ```shell
 python3 manage.py runserver 8000
 ```
+
 Последним аргументом опционально указывается порт, на котором будет работать дев сервер.
 
-## 1.7 Проект состоит из из приложений
+### 1.7 Проект состоит из из приложений
+
 Проект в джанго стоит из приложений. Чистый проект в django уже состоит из нескольких приложений.
 Список приложений можно увидеть в настройках (файл `setup.py`) в переменной `INSTALLED_APPS`
 Для создания собственный приложений надо воспользоваться командой
+
 ```shell
 python3 manage.py startapp app_name
 ```
+
 при этом создается одноименная папка.
 
-# 2 Роуты. Представления (Контроллеры)
-## 2.1
-## 2.2
-URL - Uniform Resource Locator. 
+## 2 Роуты. Представления (Контроллеры)
+
+### 2.1
+
+### 2.2
+
+URL - Uniform Resource Locator.
+
 - http:// - протокол
 - доменное имя
 - ссылка на index.html - главную страницу сайта
@@ -80,6 +106,7 @@ URL - Uniform Resource Locator.
 - часть совпадает с доменным именем - остальная роут - маршрут
 
 Возможный пример роута `car-online.ru`:
+
 - `/` - стартовая страница
 - `/cars` - список марок машин
 - `/cars/volvo` - список моделей марки вольво
@@ -88,9 +115,12 @@ URL - Uniform Resource Locator.
 Для каждого ендпоинта надо описать логику. Логика описывается во views. `views.py`
 Это может быть либо функция, любо класс для каждого url.
 
-## 2.3 Роуты
-### urls
+### 2.3 Роуты
+
+#### urls
+
 Переменная URLConf, которая задает список страниц на стайте (список эндпоинтов) называется `urlpatterns` и находится в файле `urls.py`. Содержит список всех url, которые обрабатываются бэкэндом.
+
 ```python
 from horoscope.views import leo
 
@@ -98,11 +128,14 @@ urlpatterns = [
     path('leo/', leo),
 ]
 ```
+
 При этом будет получено status код 301, если клиент зашел на ссылку без `/`. В этом случае браузер перенаправит пользователя на адрес со `/` на конце.
 
-### views
+#### views
+
 Теперь надо определить представление, которое будет срабатывать при переходе по новому url.
 создадим нужное представление в файле `views.py`.
+
 ```python
 #vies.py
 from django.http import HttpResponse
@@ -111,8 +144,10 @@ def leo(request):
     return HttpResponse("<p>Hello from Django!</p>")
 ```
 
-### page 404
+#### page 404
+
 Данное представление вернёт страницу с кодом 404
+
 ```python
 # views.py
 from django.http import  Http404
@@ -122,7 +157,8 @@ def get404(request):
     return Http404
 ```
 
-## 2.4 Создаем собственный URLconf. `django.urls.include`
+### 2.4 Создаем собственный URLconf. `django.urls.include`
+
 https://django.fun/ru/docs/django/4.1/topics/http/urls/
 
 Это файл `urls.py`.
@@ -130,6 +166,7 @@ https://django.fun/ru/docs/django/4.1/topics/http/urls/
 
 Для этого в индексном роуте есть инструкция по импорту дочерних роутов из приложений джанго.
 Вместо приложения роуты также можно импортировать из пакета (директории с `__init__.py`).
+
 ```python
 # project_folder/urls.py
 from django.urls import include
@@ -139,7 +176,9 @@ urlpatterns = [
     path('horoscope/', include('app_name.views')),
 ]
 ```
+
 В дочернем роуте надо создать такой же параметр `urlpatterns`. В подключаемых роутах также можно подключить другой роут или контроллер (вьюху).
+
 ```python
 # app_folder/urls.py
 from django.urls import path
@@ -150,8 +189,11 @@ urlpatterns = [
 ]
 ```
 
-## Отладка Django 
-В VSC может придётся создать следующий файл конфигурации.
+### 2.5 Отладка Django
+
+В VSC может придётся созда
+ть следующий файл конфигурации.
+
 ```json
 {
     // Use IntelliSense to learn about possible attributes.
@@ -173,23 +215,29 @@ urlpatterns = [
     ]
 }
 ```
-## 2.6 Динамические URL в Django. Динамические параметры в роутах.
+
+### 2.6 Динамические URL в Django. Динамические параметры в роутах
+
 Для того, чтобы Django воспринимал параметр в роуте его надо поместить в `<parameter>`.
 Также данный параметр надо передать внутрь нашего вьюшки, которая обрабатывает запросы от этого роута.
+
 ```python
 # urls.py
 urlpatterns = [
     path('<sign>', view.sign_controller),
 ]
 ```
+
 ```python
 #views.py
 def sign_controller(request, sign):
     pass
 ```
+
 По-умолчанию все параметры считываются в виде строки.
 
-## 2.7 Конвертеры роутов.
+### 2.7 Конвертеры роутов
+
 Конвертеры позволяют конвертировать динамические параметры в нужный ип данных или брать только часть url строки.
 
 При этом система автоматически заресолвит тот роут, что первым подойдёт по списку.
@@ -219,26 +267,34 @@ def get_info_by_number(request, zodiac_by_number: int):
     pass
 ```
 
-## 2.8 Redirect URL. `django.http.HttpResponseRedirect` `django.shortcuts.redirect`
-### `HttpResponseRedirect`
+### 2.8 Redirect URL. `django.http.HttpResponseRedirect` `django.shortcuts.redirect`
+
+#### `HttpResponseRedirect`
+
 Перенаправление (redirect) - это способ перенаправления пользователей с одной страницы на другую. При этом он может пригодиться например при перенаправлении пользователей с адреса `week_days/1/` на `week_days/monday/`.
 
 Redirect в Django можно выполнить при помощи класса `HttpResponseRedirect`:
+
 ```python
 from django.http import HttpResponseRedirect
 
 def my_controller(request):
     return HttpResponseRedirect("https://yandex.ru")
 ```
+
 За классом `HttpResponseRedirect` возвращает статус код __302__.
 Есть и другие классы, которые возвращают другие коды редиректа:
-класс | код
--- | --
-`HttpResponseRedirect` | __302__
-`HttpResponsePermanentRedirect` | __301__
-`HttpResponseNotModified` | __304__
-### `redirect`
+
+| класс | код |
+| -- | -- |
+| `HttpResponseRedirect` | __302__ |
+| `HttpResponsePermanentRedirect` | __301__ |
+| `HttpResponseNotModified` | __304__ |
+
+#### `redirect`
+
 Это функция - обертка, которая возвращает или класс `HttpResponseRedirect` или класс `HttpResponsePermanentRedirect`.
+
 ```python
 from django.shortcuts import redirect
 
@@ -246,8 +302,10 @@ def my_controller(request):
     return redirect('http:google.com', permanent=True,)
 ```
 
-## 2.9 Псевдонимы для роутов. Функция `reverse` в Django. `django.urls.reverse`
-### Псевдонимы для роутов
+### 2.9 Псевдонимы для роутов. Функция `reverse` в Django. `django.urls.reverse`
+
+#### Псевдонимы для роутов
+
 ```python
 # urls.py
 
@@ -255,21 +313,27 @@ urlpatterns = [
     path('some_address/', views.controller, name='route_alias_name'),
 ]
 ```
+
 Теперь осталось передать это имя функции `reverse` в контроллере.
 
+#### `reverse`
 
-### `reverse`
 Она позволяет генерировать url адреса согласно имени url адреса в приложении.
+
 ```python
 reverse(viewname, urlconf=None, args=None, kwargs=None, current_app=None)
 ```
+
 - `viewname` - строка, содержащая имя URL адреса. _Обязательный аргумент_.
 - `urlconf` - позволяет задать имя модуля с настройками url адресов `urls.py`. Нужен для того, чтобы задать другой модуль со своим файлом urls.py.
 - `args` - список или кортеж элементов для передачи в `url` адрес:
+
     ```python
     reverse('my_view_name', args=[1])
     ```
+
 - `kwargs` - словарь именованных аргументов для передачи в url адрес.
+
     ```python
     reverse('my_view_name2', kwargs={'width': 2})
     ```
@@ -282,8 +346,11 @@ def controller(request):
     redirect_url = reverse('square_area', kwargs={'width': 2})
     return HttpResponseRedirect(redirect_url)
 ```
-### Пространство имен `app_name` - `namespace`
+
+#### Пространство имен `app_name` - `namespace`
+
 Можно задать пространство имен во _urls.py_ при помощи переменной `app_name`
+
 ```python
 #urls.py
 
@@ -294,6 +361,7 @@ urls = [
 ```
 
 Или же его же можно задать при подключении приложения гороскоп из корневого urls.py:
+
 ```python
 from django.urls import include
 
@@ -304,6 +372,7 @@ urlpatterns = [
 ```
 
 тогда надо при указании псевдонимов использовать это пространство имен:
+
 ```python
 # views.py
 from django.urls import reverse
@@ -311,13 +380,16 @@ pass
 redirect_url = reverse(viewname="horoscope:zodiac_index")
 ```
 
-## 2.10 Создание главного меню
+### 2.10 Создание главного меню
+
 Страница для всех знаков зодиака.
 Для этого надо внедрить html код.
 
-## 2.12 Собственные конвертеры
+### 2.12 Собственные конвертеры
+
 Пример базовых конвертеров можно найти в модуле `from django.urls import converters`.
 Конвертер представляет собой класс из трех составляющих:
+
 - `regex` - переменная, описывающая регулярное выражение
 - `to_python(self, value)` - функция, конвертирующая найденную строку в питоновский тип
 - `to_url(self, value)` - функция, конвертирующая питоновский объект в представление строки
@@ -335,7 +407,9 @@ class FourDigitsConverter:
     def to_url(self, value) -> str:
         return f"{value:04}"
 ```
+
 Для регистрации конвертера нужно импортировать 
+
 ```python
 from django.urls import register_converters
 ```
@@ -353,7 +427,8 @@ urlpatterns = [
 ]
 ```
 
-## 2.13 Тестирование представлений
+### 2.13 Тестирование представлений
+
 Юнит тесты или модульное тестирование.
 Будем тестировать отдельные модули - представления во вьюхах.
 Обычно тестирование приложения в джанго происходит таким образом - что проверяются адреса страниц и то, что пользователь может по этим адресам получить контент.
@@ -361,13 +436,13 @@ urlpatterns = [
 Обычно тесты на уровне приложения создаются в корне проекта в каталоге `tests`.
 Но мы будем писать тесты на уровне приложения в каталоге приложения - файле `tests.py`.
 
-
 Создаем класс, отнаследованный от `TestCase` и внутри пишем набор функция, каждая их которых тестирует одно наше представление.
 
 Названия методов для тестирования в классе должны начинаться с `test_`.
 
 Самый важный для нас атрибут это `self.client`. Под ним подразумевается объект, который заменяет нам браузер. Браузер может отправлять все виды запросов (в том числе `get` и `post`).
 Также есть метод `assertEqual`, который проверяет два параметра на равенство.
+
 ```python
 response = self.client.get(url)
 status_code = response.status_code
@@ -391,10 +466,10 @@ class TestHoroscope(TestCase):
         self.assertEqual(response.url, '/horoscope/libra/')
 ```
 
-
 Можно из ответа получить страницу в байтах: `response.content`. 
 Контент можно декодировать в строку: `response.content.decode()`.
 Далее можно проверить на вхождение чего-то в результате:
+
 ```python
 def test_libra(self):
     response = self.client.get('/horoscope/')
@@ -405,29 +480,32 @@ def test_libra(self):
 И конечно можно и нужно использовать функцию `reverse` для ресолва url адресов по их псевдонимам.
 
 ### Типы проверок
-assert | выражение
--- | --
-`assertEqual(a, b)` | `a == b`
-`assertNotEqual(a, b)` | `a != b`
-`assertTrue(x)` | `bool(x) is True`
-`assertFalse(x)` | `bool(x) is False`
-`assertIs(a, b)` | `a is b`
-`assertIsNot(a, b)` | `a is not b`
-`assertIsNone(x)` | `x is None`
-`assertIsNotNone(x)` | `x is not None`
-`assertIn(a, b)` | `a in b`
-`assertNotIn(a, b)` | `a not in b`
-`assertIsInstance(a, b)` | `isinstance(a, b)`
-`assertNotIsInstance(a, b)` | `not isinstance(a, b)`
 
+| assert | выражение |
+| -- | -- |
+| `assertEqual(a, b)` | `a == b` |
+| `assertNotEqual(a, b)` | `a != b` |
+| `assertTrue(x)` | `bool(x) is True` |
+| `assertFalse(x)` | `bool(x) is False` |
+| `assertIs(a, b)` | `a is b` |
+| `assertIsNot(a, b)` | `a is not b` |
+| `assertIsNone(x)` | `x is None` |
+| `assertIsNotNone(x)` | `x is not None` |
+| `assertIn(a, b)` | `a in b` |
+| `assertNotIn(a, b)` | `a not in b` |
+| `assertIsInstance(a, b)` | `isinstance(a, b)` |
+| `assertNotIsInstance(a, b)` | `not isinstance(a, b)` |
 
-### Команда для запуска тестов 
+### Команда для запуска тестов
+
 Команда для запуска тестирования приложения:
+
 ```shell
 python3 manage.py test app_name
 ```
 
 ### отладка с тестами в VSCode
+
 ```json
 {
    "name":"Python: horoscope_test",
@@ -444,8 +522,10 @@ python3 manage.py test app_name
 }
 ```
 
-# 3. Шаблоны и статические файлы
-## 3.1 Что такое шаблон и как его создать
+## 3. Шаблоны и статические файлы
+
+### 3.1 Что такое шаблон и как его создать
+
 Django поддерживает кроме своего шаблонизатора Django Template Language ещё и сторонние шаблонизаторы, например jinja2.
 
 Шаблон в django - это статические html файл, который состоит из статических частей и динамических.
@@ -456,18 +536,22 @@ Django поддерживает кроме своего шаблонизатор
 
 Ещё может понадобиться зарегистрировать свой шаблон в файле `settings.py`.
 В файле `settings.py` в переменной `TEMPLATES` хранятся настройки шаблонизатора.
+
 - `BACKEND` - указание на язык шаблона, например `django.template.backends.django.DjangoTemplates` говорит что будет использоваться язык шаблонов django template language
 - `DIRS` - список. где джанго ищет шаблоны. Пути должны быть абсолютными?!
+
     ```python
     DIRS = [
         "BASEDIR\app_name\templates",
     ]
     ```
+
 - `APP_DIRS` - искать ли в папках с приложением
 
 Или можно зарегистрировать своё приложение в переменную `INSTALLED_APPS`, чтобы  шаблоны и искались среди шаблонов указанного приложения.
 
 Чтобы вернуть файл пользователю он отправляется в представлении (вьюхе).
+
 ```python
 from django.template.loader import render_to_string
 
@@ -477,9 +561,11 @@ def get_info(request):
 ```
 
 ## 3.2 Поиск шаблонов в Django. Коллизии имен шаблонов. `render`
+
 Поиск шаблонов осуществляется в том порядке, в каком подключены приложения в `settings.INSTALLED_APPS`. Если шаблон нашелся по пути в каталоге `templates` первого по списку подключенного приложения, то он применится. Поэтому следует избегать одинаковых путей к шаблонам для разных приложений. Для этих целей и создают в каталоге `templates` отдельный каталог для каждого приложения, чтобы не было коллизий имён шаблонов.
 
 ### `render`
+
 ```python
 from django.template.loader import render_to_string
 from django.http import HttpResponse
@@ -488,13 +574,16 @@ def index(request):
     response = render_to_string('app_name/index.html')
     return HttpResponse(response)
 ```
+
 можно заменить с использованием функции `render`
+
 ```python
 from django.shortcuts import render
 
 def index(request):
     return render(request, 'app_name/index.html')
 ```
+
 ```python
 def render(
     request, template_name, context=None, content_type=None, status=None, using=None
@@ -506,11 +595,13 @@ def render(
     content = loader.render_to_string(template_name, context, request, using=using)
     return HttpResponse(content, content_type, status)
 ```
+
 Внутри себя `render` вызывает всю ту же функцию `render_to_string` и затем возвращает `HttpResponse`.
 
 ```python
 render(request, template_name, context: dict, content_type, status, using)
 ```
+
 - `request` - обязательный параметр - запрос
 - `template_name` - обязательный - имя шаблона
 - `context` - словарь с переменными для шаблона
@@ -518,24 +609,25 @@ render(request, template_name, context: dict, content_type, status, using)
 - `status` - код ответа HTTP, default = 200
 - `using` - строка с именем бд, если используется несколько бд.
 
+## 3.3 Django Template Language DTL. Рендеринг шаблона
 
-## 3.3 Django Template Language DTL. Рендеринг шаблона.
-В контексте `render` передаются параметры, которые встраиваются в шаблон DTL 
+В контексте `render` передаются параметры, которые встраиваются в шаблон DTL
+
 ```python
 render(request, template_name, context: dict, content_type, status, using)
 ```
 
 Встраивание в шаблон:
+
 - `{{ variable }}` - переменная
 - `{{ dict.key }}` - значение по ключу в словаре
 - `{{ var1 }}` `{{ var2 }}` - встраивание нескольких переменных
 
 ## 3.4 Фильтры в шаблонах Django
+
 При помощи фильтров можно выполнять вычисления внутри шаблонов.
 В шаблонах нельзя вызывать методы питона.
 https://docs.djangoproject.com/en/4.2/ref/templates/builtins/#built-in-filter-reference
-
-
 
 - `capfirst` | `{{ var|capfirst }}` | делает первую букву заглавной
 - `upper` | `{{ var|upper }}` | в верхний регистр
@@ -546,7 +638,7 @@ https://docs.djangoproject.com/en/4.2/ref/templates/builtins/#built-in-filter-re
 - `rjust` | `{{ value|rjust:"10" }}` | строка длиной 10 символов выравнивание к правому краю
 - `cut` | `{{ string|cut:symbol }}` | удаляет все символы из строки
 - `truncatewords` | `{{ contents|truncatewords:2 }}` | оставляет первые два слова и затем ставит многоточие
-- `truncatechars` | ` {{ content|truncatechars:100 }}` | обрезает контент до 100 символов и ставит многоточие
+- `truncatechars` | `{{ content|truncatechars:100 }}` | обрезает контент до 100 символов и ставит многоточие
 - `truncatechars_html` | `{{ content|truncatechars_html:20 }}` обрезать с сохранением закрывающих тэгов html
 - `date` | `{{ value|date:"D d M Y"}}` | преобразование даты к определённому формату
 - `default` | `{{ value|default:"nothing" }}` | заменяет ложные значения ("" пустую строку) на значения по-умолчанию
@@ -568,9 +660,11 @@ https://docs.djangoproject.com/en/4.2/ref/templates/builtins/#built-in-filter-re
 - `slugify` | `{{ value|slugify }}` | в нижний регистр и все пробелы заменяются на `-`
 
 ### Использование фильтров вне шаблона
+
 Фильтры в Django можно использовать не только в шаблонах, но и в любом другом месте python-кода. Для этого нужно импортировать нужный фильтр из `django.template.defaultfilters` и вызвать его, передав нужные аргументы
 
 Пример использования фильтра `slugify` вне шаблона:
+
 ```python
 from django.template.defaultfilters import slugify
 
@@ -579,13 +673,17 @@ slug = slugify(title)
 
 print(slug)
 ```
+
 Все работает как обычные функции в python: вызываете функцию, передаете аргументы, получаете результат.
 
 ## 3.5 Тэги в Django
+
 Все тэги заключаются в `{%  %}`. Внутри тэга обычные переменные сразу доступны.
 
 ### `{% if %} {% endif %}`
+
 Позволяет добавить условный оператор внутрь шаблона.
+
 ```python
 {% if athlete_list and not coach_list != x or name in "abcdef" or name not is None %}
     Number of athletes: {{ athlete_list|length }}
@@ -605,7 +703,9 @@ print(slug)
     <p>i = {{ forloop.counter }}</p>
 {% endfor %}
 ```
+
 Внутри цикла `for` доступны некоторые специальные переменные.
+
 - `forloop.counter` - текущий индекс итерации c 1
 - `forloop.counter0` - индекс с 0 (смещение)
 - `forloop.revcounter` - номер итерации с конца
@@ -614,11 +714,13 @@ print(slug)
 - `forloop.parentloop` - содержит объект внешнего цикла, если есть (только для вложенных циклов)
 
 Допустима распаковка при обходе
+
 ```python
 {% for i, j in values %}
 ```
 
 Можно обходить словари
+
 ```python
 {% for key, value in dict.items %}
     <p>
@@ -628,12 +730,15 @@ print(slug)
 ```
 
 Можно обходить значения в обратном порядке:
+
 ```python
 {% for i in list reversed %}
 ```
 
 ### `{% empty %}`
+
 Данный блок срабатывает когда коллекция  пустая
+
 ```html
 {% for i in list %}
     <p>element: {{i}}</p>
@@ -643,22 +748,28 @@ print(slug)
 ```
 
 ## 3.7 Тэг `url`
+
 Является аналогом метода `reverse` для шаблонов.
+
 ```python
 {% url "some_url_name" v1 v2 %}
 ```
+
 или
+
 ```python
 {% url "some_url_name" arg1=v1 arg2=v2 %}
 ```
 
-## 3.8 Наследование шаблонов в Django. Тэги `block` `extends`.
+### 3.8 Наследование шаблонов в Django. Тэги `block` `extends`
+
 Наследование шаблона в том числе позволяет избавиться от дублирования кода.
 В базовом шаблоне описываются все неизменяемые вещи - вся структура html.
 Обычно базовый шаблон создают не на уровне приложения, а на уровне проекта по пути `project/templates/base.html`. Естественно, что можно его создавать и на уровне приложения.
 Если шаблон будет создан на уровне проекта, то надо добавить каталог с шаблоном в `settings.py` переменную `TEMPLATES`.
 
 Для подстановки значений в родительский шаблон существует тэг `block`:
+
 ```html
 # base.html
 <title>
@@ -672,7 +783,9 @@ print(slug)
     {% endblock %}
 </body>
 ```
+
 Для использования базового шаблона, мы должны от него отнаследоваться в дочернем шаблоне при помощи конструкции тэга `extends` и можно задать значения недостающих  блоков.
+
 ```html
 # index.html
 {% extends 'base.html' %}
@@ -687,7 +800,9 @@ print(slug)
     <h1>Контент</h1>
 {% endblock %}
 ```
+
 При переопределении блока может понадобиться включить содержимое блока из родительского шаблона:
+
 ```python
 {% extends 'base.html' %}
 
@@ -695,12 +810,14 @@ print(slug)
   {{ block.super }}
 {% endblock %}
 ```
-## 3.8 Тэг `include`
-помещать в `app_name/templates/app_name/includes/include.html`
 
+## 3.8 Тэг `include`
+
+помещать в `app_name/templates/app_name/includes/include.html`
 
 Позволяет включать один шаблон в другой.
 По умолчанию создается каталог `templates/app_name/includes`, в который помещается шаблон, например следующей структуры:
+
 ```html
 <nav>
     <a href="#id1"></a>
@@ -709,7 +826,8 @@ print(slug)
 ```
 
 Затем данный шаблон может быть включен в другой шаблон
-```
+
+```html
 {% block content %}
     {% block nav %}
         {% include 'app_name/includes/navbar.html' %}
@@ -723,16 +841,19 @@ print(slug)
 
 Импортируемый шаблон получает доступ ко всем переменным того шаблона, из которого он импортируется.
 Чтобы импортируемому шаблону запретить доступ ко всем внутренним переменным добавляется ключевое слово `only`:
+
 ```html
 {% include 'horoscope/includes/navbar.html' only %}
 ```
 
 Также можно вручную задавать переменные для передачи их в подключаемый шаблон при помощи конструкции `with`:
-```
+
+```html
 {% include 'app_name/includes/navbar.html' only with a=100 b='abc' %}
 ```
 
 ## 3.10 Подключаем статические файлы
+
 https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 Шаблоны не являются статикой.
@@ -742,10 +863,11 @@ https://docs.djangoproject.com/en/5.0/howto/static-files/
 За подключение статики отвечает строчка `django.contrib.staticfiles` в списке `INSTALLED_APPS` из файла `setting.py`.
 
 
-
 ### local
+
 По соглашению, папка со статичными файлами в проекте `app_name/static/`. Далее в этом каталоге, по аналогии с шаблонами, создается каталог с именем приложения, где размещаются статичные файлы для избежания коллизии имён.
 Далее принято разделять тип статики
+
 - `css/`
 - `js/`
 - `img/`
@@ -753,6 +875,7 @@ https://docs.djangoproject.com/en/5.0/howto/static-files/
 Т.е. результирующий путь `app_name/static/app_name/css/style.css`.
 
 ### global static
+
 Глобальную статику, относящуюся ко всему проекту целиком принято выносить в каталог с проектом - `project_folder/static/`.
 Для добавления каталогов для поиска статичных файлов надо вписать переменную `STATICFILES_DIRS` в файл `settings.py`:
 ```python
@@ -770,37 +893,46 @@ STATICFILES_DIRS = [
 В переменной `STATIC_ROOT` содержится путь до статичных файлов для деплоя проекта.
 
 ## settings.py
+
 ```python
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static') # для деплоя
 ```
 
 ### Подключение статики в шаблон
+
 Для включения функциональности, связанной со статичными файлами используется тэг шаблона `{% load static %}`
+
 ```html
 <head>
     {% load static %}
     <link rel="stylesheet" href="{% static 'app_name/css/style.css' %}">
 </head>
 ```
+
 После этой строчки можно указать какой файл `css` можно подгрузить в шаблон.
 Поиск статичный файлов происходит в каталогах `static` для каждого приложения, поэтому путь отсчитывается от этого пути.
 
 Если подключения различных стилей в каждом шаблоне можно воспользоваться блочной структурой и определить блоки, которые подключаются в заголовке.
 
 ### Сборка статики
+
 Чтобы собрать всю статику локально и вебсерверу было удобнее с ней работать можно воспользоваться командой
+
 ```shell
 python manage.py collectstatic
 ```
+
 После этого даже все внешние стили и прочее будут скопированы в каталог `STATIC_ROOT`.
 
 ## 3.11 Создание собственных фильтров
+
 https://docs.djangoproject.com/en/3.2/howto/custom-template-tags/
 Для создания собственных фильтров и тэгов надо создать питоновский пакет (каталог с `__init__.py`).
 Название пакета - `templatetags`.
 Т.е. путь каталога: `project_dir/app_name/templatetags/__init__.py`
 Создаем по этому пути файл фильтра, например `my_filter.py`:
+
 ```python
 # my_filter.py
 from django import template
@@ -815,11 +947,14 @@ def split(value, key=" ") -> list:
 ```
 
 Для добавления фильтра шаблон его надо загрузить при помощи тэга `{% load %}` указав имя файла без расширения.
+
 ```html
 {% load my_filter %}
 {{ value|split:" - " }}
 ```
+
 Для того, чтобы гарантировать, что в качестве водного параметра в нащ фильтр попадет строка надо навесить на функцию ещё один декоратор:
+
 ```python
 # my_filters.py
 
@@ -834,13 +969,16 @@ def split(value: str, key: str = " ") -> list[str]:
     return value.split(key)
 ```
 
-# 4. Базы данных. Модели. ORM
-## 4.3 Модели
+## 4. Базы данных. Модели. ORM
+
+### 4.3 Модели
+
 Настройки для джанго для подключения к бд хранятся в файле `settings.py` в переменной `DATABASES`.
 
 Модели для ORM размещаются в файле `models.py`.
 Классы представляют таблицы в бд, а экземпляры класса являются записями в таблице.
 Для создания своей модели данных надо создать класс, отнаследовав его от `django.db.models.Model`
+
 ```python
 
 from django.db import models
@@ -853,14 +991,18 @@ class Movie(models.Model):
         verbose_name = "Фильм"
         verbose_name_plural = "Фильмы"
 ```
+
 Свойство `id` создается автоматически.
 
 Далее следует указать поля. Класс `CharField` является потомком класса `models.Field`, который является базовым для всех полей объекта.
 
-###  класс Meta у модели
+### класс Meta у модели
+
 https://docs.djangoproject.com/en/5.0/topics/db/models/#meta-options
+
 Класс мета позволяет задать модели метаданные, т.е. это такие данные, которые не не являются полями. Например это может быть сортировка, название таблицы в базе данных, удобочитаемые названия и т.п.
 Полный список таки атрибутов https://docs.djangoproject.com/en/5.0/ref/models/options/
+
 - `db_table: str` - имя таблицы в базе данных
 - `ordering: list[str] = ["-name", "age"]` - сортировка против имени и по возрасту
 - `constraints` - ограничения
@@ -868,8 +1010,8 @@ https://docs.djangoproject.com/en/5.0/topics/db/models/#meta-options
 - `verbose_name` - удобочитаемое название
 - `verbose_name_plural` - удобочитаемое название во множественном лице 
 
-
 ### Типы полей в Django
+
 https://docs.djangoproject.com/en/5.0/ref/models/fields/
 
 - `CharField` - для строк фиксированной длины. `max_length` - обязательный параметр.
@@ -893,6 +1035,7 @@ https://docs.djangoproject.com/en/5.0/ref/models/fields/
 При изменении модели может понадобиться переопределить значение по умолчанию или возможность ставить Null значения в таблице. Например при добавлении столбца в таблицу джанго не сможет понять какими значениями его заполнять, если в этом столбце будут запрещены ненулевые значения, а значение по-умолчанию будет отсутствовать. В таком случае можно либо в модели задать `default` или `null=True` перед миграцией.
 
 ### Аттрибуты Field
+
 ```python
 class Field(RegisterLookupMixin):
     """Base class for all field types"""
@@ -924,6 +1067,7 @@ class Field(RegisterLookupMixin):
     ):
     pass
 ```
+
 - `verbose_name: str` - имя поля, которое будет отображаться в админском интерфейсе джанго и в других контекстах.
 - `help_text: str` - подсказка под формой ввода в админском интерфейсе
 - `null: bool` - указывает может ли поле содержать NULL значения. default: False
@@ -933,44 +1077,57 @@ class Field(RegisterLookupMixin):
     - бд создают индекс по уникальным полям, что приводит к уменьшению задержек при выборке значений по уникальным полям
 
 ### Миграции
+
 Механизм миграция является аналогом системы версионирования в гите. Миграции отвечают за сохранения состояний в таблицах.
 Для создания миграция надо выполнить команду. Предварительно не забыть добавить приложение в список приложений `INSTALLED_APPS`, иначе не изменения не будут найдены.F
+
 ```python
 python manage.py makemigrations
 ```
 
 Для применения миграции вводится команда 
+
 ```shell
 python3 manage.py migrate
 ```
+
 #### dependencies
+
 При первой миграции происходит создание таблиц, заданных в уже подключенных приложениях.
 У первой миграции не будет зависимостей (поле `dependencies`). У остальных будет - это та миграция, которую надо произвести перед данной.. Таким образом выстраивается порядок применения миграций (дерево).
 Начальная миграция имеет атрибут `initial  = True`.
 
 #### operations
+
 В этом атрибуте лежит список всех изменений, которые надо применить к текущей миграции.
 
 #### Список миграций
+
 Чтобы просмотреть все миграции можно воспользоваться командой 
+
 ```shell
 python3 manage.py showmigrations
 ```
+
 При этом миграция может оказаться намного больше, чем мы делали. Показываются все миграции, но применены к БД будут только те, которые мы сделали.
 Все примененные миграции будут отмечены `x`.
 
 ### Управление миграциями
 
 Просмотреть миграции
+
 ```shell
 python3 manage.py showmigrations
 ```
 
 Откатиться к конкретной миграции можно при помощи команды migrate и номера миграции (например 003).
+
 ```shell
 python3 manage.py migrate app_name migration_number
 ```
+
 Чтобы накатить миграции для какого-то приложения можно выполнить команду `migrate` без указания номера:
+
 ```shell
 python3 manage.py migrate app_name
 ```
@@ -978,19 +1135,24 @@ python3 manage.py migrate app_name
 ## 4.5 Добавление данных в таблицу
 
 Можно запустить окружение питона в консоли со всеми переменными.
+
 ```shell
 python manage.py shell
 ```
+
 Далее в консоли можно будет импортировать нужный класс и создать экземпляр.
+
 ```python
 from movie_app.models import Movie
 
 movie = Movie(name="FilmName", rating=50)
 movie.save()
 ```
+
 Для того чтобы изменения применились, надо сохранить этот объект (произвести транзакцию) методом `object_name.save()`.
 
 Чтобы вывести список sql запросов надо обратиться к модулю `django.db.connection`:
+
 ```python
 from django.db import connection
 
@@ -998,38 +1160,50 @@ print(connection.queries)
 ```
 
 Добавить данные можно еще так:
+
 ```python
 Movie.objects.create(name="Avatar 2", rating=30)
 ```
+
 метод `save` при этом не вызывается.
 
 ### django-extensions
+
 Также можно воспользоваться модулем `django-extensions` который позволяет сразу выводить sql запросы после выполнения транзакций.
 Устанавливаем.
+
 ```shell
 pip3 install django-extensions
 ```
+
 Добавляем к списку приложений.
+
 ```python
 INSTALLED_APPS = [
     ...,
     'django_extensions',
 ]
 ```
+
 Запускаем консоль с параметрами `--print-sql`
+
 ```python
 python manage.py shell_plus --print-sql
 ```
 
 ## 4.6 Выборка данных из таблиц
+
 https://docs.djangoproject.com/en/3.2/ref/models/querysets/
 
 В классе таблиц (отнаследованных от django.models.Model) есть специальный атрибут `objects`, который является экземпляром `Manager`. У класса `Manager` есть метод `.all()` который выводит все элементы - коллекция типа QuerySet.
+
 ```python
 rows = Movie.objects.all()
 ```
+
 Данный метод поддерживает операцию индексации и срезы. При этом измениться сам sql запрос к базе данных (LIMIT OFFSET).
 После получения конкретной записи можно обращаться к её атрибутам через точечную нотацию.
+
 ```python
 movie = Movie.objects.all()
 print(movie.rating)
@@ -1040,10 +1214,13 @@ print(movie.rating)
 - `Model.objects.list_values()` - возвращает список списков со значениями всх полей
 
 ### QuerySet
+
 ```python
 persons = Person.objects.all()
 ```
+
 Это тот же самый запрос, только с использованием Django ORM. Это `QuerySet`. Отличие от выборки в SQL заключается в том, что `QuerySet` может быть создан, отфильтрован, нарезан и, как правило, передан без фактического запроса к базе данных. Так же `QuerySet` это итерируемый объект и мы можем проитерировать каждую запись, если мы хотим обработать каждую запись в отдельности:
+
 ```python
 for person in persons:
     print(person.name)
@@ -1052,9 +1229,11 @@ for person in persons:
 ```
 
 #### выборка столбцов
+
 ```sql
 SELECT name, age FROM Person;
 ```
+
 Данный запрос вернет все записи из таблицы Person но в результате будут только столбцы name и age.
 
 ```python
@@ -1062,17 +1241,21 @@ Person.objects.only('name', 'age')
 ```
 
 #### Distinct
+
 ```sql
 SELECT DISTINCT name, age FROM Person;
 ```
+
 ```python
 Person.objects.values('name', 'age').distinct()
 ```
 
 #### LIMIT
+
 ```sql
 SELECT * FROM Person LIMIT 10;
 ```
+
 Вернет 10 первых записей из таблицы.
 
 ```python
@@ -1080,9 +1263,11 @@ Person.objects.all()[:10]
 ```
 
 #### OFFSET
+
 ```sql
 SELECT * FROM Person OFFSET 5 LIMIT 5;
 ```
+
 Вернет первые 5 записей, но прежде он пропустит 5 первых записей. Т.е. по сути, он пропускает первые 5 записей и берет 5 записей после них начиная с 6й.
 
 ```python
@@ -1090,10 +1275,13 @@ Person.objects.all()[5:10]
 ```
 
 #### WHERE
+
 ```sql
 SELECT * FROM Person WHERE id = 1;
 ```
+
 Вернет одну запись у которой id = 1.
+
 ```python
 Person.objects.filter(id=1)
 ```
@@ -1117,14 +1305,17 @@ Person.objects.exclude(age=18)
 ```
 
 #### Оператор BETWEEN
+
 ```sq;
 SELECT * FROM Person WHERE age BETWEEN 10 AND 20;
 ```
+
 ```python
 Person.objects.filter(age__range=(10, 20))
 ```
 
 #### LIKE
+
 ```sql
 WHERE name like '%A%';
 WHERE name like binary '%A%';
@@ -1144,42 +1335,56 @@ Person.objects.filter(name__endswith='A')
 ```
 
 #### Оператор IN
+
 SQL
+
 ```sql
 WHERE id in (1, 2);
 ```
+
 Оператор IN позволяет определить, совпадает ли значение объекта со значением в списке. Используется с WHERE.
 
 Django
+
 ```python
 Person.objects.filter(id__in=[1, 2])
 ```
 
 #### AND, OR и NOT операторы
+
 SQL
+
 ```sql
 WHERE gender='male' AND age > 25;
 ```
+
 Логическое И вернет записи где `gender = male` И возраст больше 25
 
 Django
+
 ```python
 Person.objects.filter(gender='male', age__gt=25)
 ```
+
 SQL
+
 ```sql
 WHERE gender='male' OR age > 25;
 ```
+
 Логическое ИЛИ вернет записи где gender male ИЛИ возраст больше 25.
 
 Django
+
 ```python
 from django.db.models import Q
 Person.objects.filter(Q(gender='male') | Q(age__gt=25))
 ```
+
 Немного громоздко, но у всего есть свои плюсы и минусы.
 
 Для русского языка в SQLite3 работает поиск через регулярки - iregex:
+
 ```python
 MyModel.objects.filter(Q(h1__iregex=query) | Q(content__iregex=query))
 ```
@@ -1187,74 +1392,99 @@ MyModel.objects.filter(Q(h1__iregex=query) | Q(content__iregex=query))
 #### NOT
 
 SQL
+
 ```sql
 WHERE NOT gender='male';
 ```
+
 Логическое НЕ. Вернет все записи где genre НЕ male.
+
 ```python
 Person.objects.exclude(gender='male')
 ```
 
-####  NULL значение
+#### NULL значение
+
 SQL
+
 ```sql
 WHERE age is NULL;
 WHERE age is NOT NULL;
 ```
+
 Вернет где age равно null (пустое) или наоборот, где не пустое.
 
 Django
+
 ```python
 Person.objects.filter(age__isnull=True)
 Person.objects.filter(age__isnull=False)
 ```
+
 ##### Еще один вариант
+
 ```python
 Person.objects.filter(age=None)
 Person.objects.exclude(age=None)
 ```
 
 #### Сортировка ORDER BY
+
 SQL
 ```sql
 SELECT * FROM Person order by age;
 ```
+
 Вернет все записи отсортированные по age
 
 Django
+
 ```python
 Person.objects.order_by('age')
 ```
+
 SQL
+
 ```sql
 SELECT * FROM Person ORDER BY age DESC;
 ```
+
 Сделает тоже самое, но отсортирует по убыванию.
 
 Django
+
 ```python
 Person.objects.order_by('-age')
 ```
 
 #### Создание записи в таблице или модели
+
 SQL
+
 ```sql
 INSERT INTO Person VALUES ('Jack', '23', 'male');
 ```
+
 Создаст новую запись в таблице Person с указанными данными.
 
 Django
+
 ```python
 Person.objects.create(name='jack', age=23, gender='male')
 ```
+
 #### Обновление записи в модели или таблице
+
 SQL
+
 ```sql
 UPDATE Person SET age = 20 WHERE id = 1;
 ```
+
 Обновляет запись в таблице `Person` устанавливает `age` в значение 1 где `id = 1`. По сути обновится одна запись у которой `id = 1` так как `id` у каждой записи уникальный.
 
 Django
+
 ```python
 person = Person.objects.get(id=1)
 person.age = 20
@@ -1262,13 +1492,17 @@ person.save()
 ```
 
 #### Обновление сразу нескольких записей в таблице или модели
+
 SQL
+
 ```sql
 UPDATE Person SET age = age * 1.5;
 ```
+
 Обновляет все записи в таблице Person умножая значение записанное в колонке age на 1.5
 
 Django
+
 ```python
 from django.db.models import F
 
@@ -1276,37 +1510,49 @@ Person.objects.update(age=F('age')*1.5)
 ```
 
 #### Удаление записей
+
 SQL
+
 ```sql
 DELETE FROM Person;
 ```
+
 Удаляет все записи в таблице Person
 
 Django
+
 ```python
 Person.objects.all().delete()
 ```
+
 Удаление определенных строки
 
 SQL
+
 ```sql
 DELETE FROM Person WHERE age < 10;
 ```
+
 Удаляет строки из таблицы Person где age меньше 10.
 
 Django
+
 ```python
 Person.objects.filter(age__lt=10).delete()
 ```
 
 #### Агрегация данных функция MIN
+
 SQL
+
 ```sql
 SELECT MIN(age) FROM Person;
 ```
+
 Вернет минимальное значение столбца `age`
 
 Django
+
 ```python
 from django.db.models import Min
 Person.objects.all().aggregate(Min('age'))
@@ -4511,12 +4757,14 @@ extra_kwargs = {
 
 Т.е. тут мы создаем в сериализаторе новое генерирумое поле `url`, которое получается из поля `slug`. Т.е. фактически получается переименования поля slug в url.
 
-Мы обращаемся по какому-то `url` к нашему api, этот `url` обрабатывает какая-nj вьюха. А во вьюхе определён сериализатор, которые берёт данные из базы данных в соответствии с настройками сериализатора возвращает нам json.
+Мы обращаемся по какому-то `url` к нашему api, этот `url` обрабатывает какая-то вьюха. А во вьюхе определён сериализатор, которые берёт данные из базы данных в соответствии с настройками сериализатора возвращает нам json.
 
-Дополнительные свойства
+Дополнительные свойства:
+
 - `write_only` - поле используется __только при валидации__, т.е. при получении и проверки данных. При отправки данных пользователю данное поле не фигурирует.
 
 ### Создание view
+
 Есть несколько способов создавать вьюхи 
 - class Based View (https://www.django-rest-framework.org/tutorial/3-class-based-views/#tutorial-3-class-based-views)
 - функция с декоратором `@api_view`
@@ -5208,5 +5456,40 @@ services:
 
 ```
 
+
+
 # 2 Джанго интернет магазин
+
 https://www.youtube.com/watch?v=w-ITLbRfhnA&t=3788s
+
+
+
+# 3 Деплой
+https://www.youtube.com/watch?v=N1dYui7Qh0o
+
+При деплое надо отключать некоторые опции, которые заданы в настройках как константы, например `DEBUG = True` надо отключать.
+
+При отключённом режиме дебага не работает прокидывание статических и медиафайлов. Это можно исправить, дописав роуты в `urls.py`:
+```python
+from django.conf import settings
+from django.conf.urls.static import static
+
+
+urlpatterns = (
+    [
+        path("", include("main.urls")),
+        path("admin/", admin.site.urls),
+    ]
+    + static(prefix=settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    + static(prefix=settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+)
+```
+__НО !__ лучше практикой является прокидывание статических и медиа файлов через nginx.
+
+Статические файлы можно собрать в процессе сборки через команду:
+```shell
+python manage.py collectstatic --noinput
+```
+и затем подключить к нгинксу.
+
+Медиафайлы можно через отдельный волюм подключать к nginx.
